@@ -17,7 +17,7 @@ fi
 PS1='[\u@\h \W]\$ '
 
 
-## Bash options 
+## Bash options
 
 # Disable flow control (CTRL-S freezing io)
 stty -ixon
@@ -47,6 +47,8 @@ alias ls='ls --color=auto'
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
 alias git_rc='/usr/bin/git --git-dir=$HOME/.home_configs/ --work-tree=$HOME'
+
+alias git_bash='/usr/bin/git --git-dir=$HOME/.bashrc_git/ --work-tree=$HOME'
 
 alias vim='vim -O'
 
