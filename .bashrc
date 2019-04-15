@@ -2,6 +2,7 @@
 # ~/.bashrc
 #
 
+
 # Login
 
 # If not running interactively, don't do anything.
@@ -62,7 +63,6 @@ else
 	# show root@ when we don't have colors
 	PS1+='[\u@\h \W]\$ '
 fi
-
 
 
 ## Bash options
@@ -161,6 +161,12 @@ function extract()
 		echo "'$1' is not a valid file!"
 	fi
 }
+
+
+## Overrides
+
+# Local specific overrides of any kind.
+[ -f ~/.bash_override ] && source ~/.bash_override
 
 
 ## Unset
