@@ -11,20 +11,7 @@
 
 ## Prompts/Colors
 
-# Taken from Gentoo's default .bashrc
-case "${TERM}" in
-	[aEkx]term*|rxvt*|gnome*|konsole*|interix)
-		PS1='\[\033]0;\u@\h:\W\007\]'
-		;;
-	screen*)
-		PS1='\[\033k\u@\h:\W\033\\\]'
-		;;
-	*)
-		unset PS1
-		;;
-esac
-
-use_color=false
+# Based on Gentoo's default .bashrc
 if type -P dircolors >/dev/null ; then
 	# Enable colors for ls, etc.  Prefer ~/.dir_colors #64489
 	LS_COLORS=
@@ -40,28 +27,26 @@ if type -P dircolors >/dev/null ; then
 	# based on file attributes and ignore extensions (even the compiled
 	# in defaults of dircolors). #583814
 	if [[ -n "${LS_COLORS:+set}" ]] ; then
-		use_color=true
-	else
-		# Delete it if it's empty as it's useless in that case.
+	# Delete it if it's empty as it's useless in that case.
 		unset LS_COLORS
 	fi
-else
-	# Some systems (e.g. BSD & embedded) don't typically come with
-	# dircolors so we need to hardcode some terminals in here.
-	case "${TERM}" in
-	[aEkx]term*|rxvt*|gnome*|konsole*|screen|cons25|*color) use_color=true;;
-	esac
 fi
 
+use_color=false
+case "${TERM}" in
+	[aEkx]term*|rxvt*|gnome*|konsole*|screen|cons25|*color|*interix|xfce*) use_color=true;;
+esac
+
 if "${use_color}" ; then
-	if [[ "${EUID}" == 0 ]] ; then
-		PS1+='\[\033[01;31m\][\h\[\033[01;34m\] \W]\$\[\033[00m\] '
+	if [ -f "$HOME/.bash-powerline" ]; then
+		# install wget https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline
+		source $HOME/.bash-powerline
 	else
-		PS1+='\[\033[01;32m\][\u@\h\[\033[01;34m\] \W]\$\[\033[00m\] '
+		PS1='\[\033[01;32m\][\u@\h\[\033[01;34m\] \W]\$\[\033[00m\] '
 	fi
 else
 	# show root@ when we don't have colors
-	PS1+='[\u@\h \W]\$ '
+	PS1='[\u@\h \W]\$ '
 fi
 
 
