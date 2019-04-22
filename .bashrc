@@ -38,8 +38,10 @@ case "${TERM}" in
 esac
 
 if "${use_color}" ; then
+	# install wget https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline
 	if [ -f "$HOME/.bash-powerline" ]; then
-		# install wget https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline
+		# Set the proper terminal tab title, even though PROMPT_COMMAND will point to a function.
+		PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
 		source $HOME/.bash-powerline
 	else
 		PS1='\[\033[01;32m\][\u@\h\[\033[01;34m\] \W]\$\[\033[00m\] '
