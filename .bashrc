@@ -3,6 +3,9 @@
 #
 
 
+# Upstream: https://github.com/iddinev/bashrc
+
+
 # Login
 
 # If not running interactively, don't do anything.
@@ -104,6 +107,14 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+
+# Fuzzy Finder: https://github.com/junegunn/fzf
+# install git clone --depth 1 https://github.com/junegunn/fzf.git ~/.bash-fzf && ./fzf/install  --no-zsh --no-fish --key-bindings --completion --no-update-rc
+if [ -f ~/.fzf.bash ]; then
+	source ~/.fzf.bash
+	export FZF_COMPLETION_TRIGGER='~~'
+	export FZF_DEFAULT_OPTS='--exact --tiebreak=begin --preview "[[ $(file --mime {}) =~ binary ]] && echo {} is a binary file || (bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -500"'
+fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
 alias git_rc='/usr/bin/git --git-dir=$HOME/.home_configs_git/ --work-tree=$HOME'
