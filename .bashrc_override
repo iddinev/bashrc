@@ -1,0 +1,34 @@
+# vim: set filetype=sh:
+#
+# ~/.bash_override
+#
+# Store all kinds of usefull specific overrides and fixes.
+# Use/add/modify per machine whenever needed. Feel
+# free to keep local override files in version control
+# and/or backups.
+
+# Login
+
+## MANUAL FIX FOR XUBUNTU/old XFCE (<4.11??) and RHEL (v6??)
+# For some reason the xfce4-terminal in xubuntu
+# cannot properly set the TERM var.
+#export TERM=xterm-256color
+
+
+## Env variables
+
+# Some tools like to drop you to a terminal when encountering a problem.
+#export OE_TERMINAL_CUSTOMCMD="gnome-terminal"
+
+
+## Other
+
+# Set the proper terminal tab title, even though PROMPT_COMMAND will point to a function.
+# This fix is needed for some terminal emulators, that cannot handle the custom PROMPT_COMMAND.
+# TERM_TITLE='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+# PROMPT_COMMAND="$PROMPT_COMMAND${PROMPT_COMMAND:+; $TERM_TITLE}"
+
+
+## Unset
+
+# unset TERM_TITLE

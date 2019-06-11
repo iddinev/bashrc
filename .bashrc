@@ -162,7 +162,7 @@ function extract()
 ## Overrides
 
 # Local specific overrides of any kind.
-[ -f ~/.bash_override ] && source ~/.bash_override
+[ -f ~/.bashrc_override ] && source ~/.bashrc_override
 
 
 ## Unset
