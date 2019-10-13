@@ -1,3 +1,4 @@
+# vim: set filetype=sh:
 #
 # ~/.bashrc
 #
@@ -6,15 +7,22 @@
 # Upstream: https://github.com/iddinev/bashrc
 
 
-# Login
+# Login/Main 
 
-# If not running interactively, don't do anything.
-[[ "$-" != *i* ]] && return
+# If not running interactively or as a script, don't do anything.
+# Variable is used so bash does not report exit 1 when sourcing the file.
+AS_SCRIPT='no'
+if [[ "$-" != *i* ]] && [[ "$#" -gt 0 ]]; then
+	AS_SCRIPT='yes'
+fi
+
+[[ "$AS_SCRIPT" == 'no' ]] && return
+
 
 
 ## Prompts/Colors
 
-# Based on Gentoo's default .bashrc
+# Based on Gentoo's default .bashrc .
 if type -P dircolors >/dev/null ; then
 	# Enable colors for ls, etc.  Prefer ~/.dir_colors #64489
 	LS_COLORS=
@@ -48,17 +56,17 @@ if "${use_color}" ; then
 		PS1='\[\033[01;32m\][\u@\h\[\033[01;34m\] \W]\$\[\033[00m\] '
 	fi
 else
-	# show root@ when we don't have colors
+	# Show root@ when we don't have colors.
 	PS1='[\u@\h \W]\$ '
 fi
 
 
 ## Bash options
 
-# Disable flow control (CTRL-S freezing io)
+# Disable flow control (CTRL-S freezing io).
 stty -ixon
 
-# Append to the history file, don't overwrite it
+# Append to the history file, don't overwrite it.
 shopt -s histappend
 
 # Check the window size after each command and, if necessary,
@@ -82,7 +90,7 @@ fi
 
 ## Other
 
-# Make less more friendly for non-text input files, see lesspipe(1)
+# Make less more friendly for non-text input files, see lesspipe(1).
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # Enable bash completions.
@@ -110,11 +118,11 @@ alias l='ls -CF'
 
 # Fuzzy Finder: https://github.com/junegunn/fzf
 # install git clone --depth 1 https://github.com/junegunn/fzf.git ~/.bash-fzf && ./fzf/install  --no-zsh --no-fish --key-bindings --completion --no-update-rc
-if [ -f ~/.fzf.bash ]; then
-	source ~/.fzf.bash
-	export FZF_COMPLETION_TRIGGER='~~'
-	export FZF_DEFAULT_OPTS='--exact --tiebreak=begin --preview "[[ $(file --mime {}) =~ binary ]] && echo {} is a binary file || (bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -500"'
-fi
+# if [ -f ~/.fzf.bash ]; then
+	# source ~/.fzf.bash
+	# export FZF_COMPLETION_TRIGGER='~~'
+	# export FZF_DEFAULT_OPTS='--exact --tiebreak=begin --preview "[[ $(file --mime {}) =~ binary ]] && echo {} is a binary file || (bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -500"'
+# fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
 alias git_rc='/usr/bin/git --git-dir=$HOME/.home_configs_git/ --work-tree=$HOME'
@@ -159,12 +167,41 @@ function extract()
 }
 
 
-## Overrides
+## Unset
 
-# Local specific overrides of any kind.
-[ -f ~/.bashrc_override ] && source ~/.bashrc_override
+unset use_color
+unset AS_SCRIPT
+
+
+
+### OVERIDES
+
+# Store all kinds of usefull/os/machine specific overrides and fixes.
+# Use/add/modify per machine whenever needed.
+
+
+# Login
+
+## MANUAL FIX FOR XUBUNTU/old XFCE (<4.11??) and RHEL (v6??).
+# For some reason the xfce4-terminal in xubuntu
+# cannot properly set the TERM var.
+#export TERM=xterm-256color
+
+
+## Env variables
+
+# Some tools like to drop you to a terminal when encountering a problem.
+#export OE_TERMINAL_CUSTOMCMD="gnome-terminal"
+
+
+## Other
+
+# Set the proper terminal tab title, even though PROMPT_COMMAND will point to a function.
+# This fix is needed for some terminal emulators, that cannot handle the custom PROMPT_COMMAND.
+# TERM_TITLE='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+# PROMPT_COMMAND="$PROMPT_COMMAND${PROMPT_COMMAND:+; $TERM_TITLE}"
 
 
 ## Unset
 
-unset use_color
+# unset TERM_TITLE
