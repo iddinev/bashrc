@@ -7,18 +7,39 @@
 # Upstream: https://github.com/iddinev/bashrc
 
 
-# Login/Main 
+# Login/Main
 
 # If not running interactively or as a script, don't do anything.
 # Variable is used so bash does not report exit 1 when sourcing the file.
-AS_SCRIPT='no'
+as_script='no'
 if [[ "$-" != *i* ]] && [[ "$#" -gt 0 ]]; then
-	AS_SCRIPT='yes'
+	as_script='yes'
 fi
 
-[[ "$AS_SCRIPT" == 'no' ]] && return
+[[ "$as_script" == 'no' ]] && return
 
+backup='BACKUP'
+bashrc_path="$HOME/.bashrc"
 
+function deploy()
+{
+[ -f "$bashrc_path" ] && mv "$bashrc_path" "$bashrc_path"."$backup"
+# install plugins
+}
+
+function revert()
+{
+[ -f "$bashrc_path."$backup"" ] && mv "$bashrc_path"."$backup" "$bashrc_path"
+# delete plugins
+}
+
+function install()
+{
+}
+
+function uninstall()
+{
+}
 
 ## Prompts/Colors
 
@@ -170,7 +191,7 @@ function extract()
 ## Unset
 
 unset use_color
-unset AS_SCRIPT
+unset as_script
 
 
 
