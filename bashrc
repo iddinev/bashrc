@@ -7,7 +7,7 @@
 # Upstream: https://github.com/iddinev/bashrc
 
 
-# Login/Main
+## Login/Main
 
 # If not running interactively or as a script, don't do anything.
 # Variable is used so bash does not report exit 1 when sourcing the file.
@@ -197,11 +197,17 @@ unset as_script
 
 ### OVERIDES
 
-# Store all kinds of usefull/os/machine specific overrides and fixes.
-# Use/add/modify per machine whenever needed.
 
+# Store all kinds of useful specific overrides and fixes.
+# Use/add/modify per machine whenever needed. Feel
+# free to keep local override files in version control
+# and/or backups.
 
-# Login
+[ -f ~/.bashrc_override ] && source ~/.bashrc_override
+
+# Some useful overrides that I've picked up so far.
+
+## Login
 
 ## MANUAL FIX FOR XUBUNTU/old XFCE (<4.11??) and RHEL (v6??).
 # For some reason the xfce4-terminal in xubuntu
