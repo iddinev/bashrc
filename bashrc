@@ -7,39 +7,112 @@
 # Upstream: https://github.com/iddinev/bashrc
 
 
+
 ## Login/Main
 
-# If not running interactively or as a script, don't do anything.
+# Interactive mode = file is sourced. Otherwise = used as a script.
 # Variable is used so bash does not report exit 1 when sourcing the file.
 as_script='no'
-if [[ "$-" != *i* ]] && [[ "$#" -gt 0 ]]; then
+
+if [[ "$-" != *i* ]]; then
+
 	as_script='yes'
+	own_path="$(readlink -f $0)"
+	backup='BACKUP'
+	# bashrc_path="$HOME/.bashrc"
+	bashrc_path="./.bashrc"
+
+	function _bashrc_deploy()
+	{
+		[ -f "$bashrc_path" ] && mv "$bashrc_path" "$bashrc_path"."$backup"
+		mv -v "$own_path" "$bashrc_path"
+		# install plugins
+		_bashrc_source
+	}
+
+	function _bashrc_install()
+	{
+		_bashrc_source
+	}
+
+	function _bashrc_uninstall()
+	{
+		[ -f "$bashrc_path."$backup"" ] && mv "$bashrc_path"."$backup" "$bashrc_path"
+		# delete plugins and git dirs
+		_bashrc_source
+	}
+
+	function _bashrc_source()
+	{
+		echo "# Don't forget to source the (new) .bashrc"
+		echo "source $bashrc_path"
+	}
+
+	function _bashrc_help()
+	{
+		cat <<- _EOF_
+
+		Check the README at
+		https://github.com/iddinev/bashrc
+
+		Usage:
+			-d | --deploy    Download & setup the bashrc & plugins.
+			-i | --install   Download & setup the git repo(s).
+			-u | --uninstall Revert previous bashrc and remove git repo(s) & plugins.
+		_EOF_
+	}
+
+	# Simple argument handling, don't do anythning complicated.
+	case "$1" in
+		-d | --deploy)
+			_bashrc_deploy
+		;;
+		-i | --install)
+			_bashrc_install
+		;;
+		-u | --uninstall)
+			_bashrc_uninstall
+		;;
+		-h | --help)
+			_bashrc_help
+		;;
+		*)
+			_bashrc_help
+			exit 1
+		;;
+	esac
+
 fi
 
-[[ "$as_script" == 'no' ]] && return
+[[ "$as_script" == 'yes' ]] && exit 0
 
-backup='BACKUP'
-bashrc_path="$HOME/.bashrc"
 
-function deploy()
-{
-[ -f "$bashrc_path" ] && mv "$bashrc_path" "$bashrc_path"."$backup"
-# install plugins
-}
+## Bash options
 
-function revert()
-{
-[ -f "$bashrc_path."$backup"" ] && mv "$bashrc_path"."$backup" "$bashrc_path"
-# delete plugins
-}
+# Disable flow control (CTRL-S freezing io).
+stty -ixon
 
-function install()
-{
-}
+# Append to the history file, don't overwrite it.
+shopt -s histappend
 
-function uninstall()
-{
-}
+# Check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# Do not try to <TAB> expand if nothing is typed.
+shopt -s no_empty_cmd_completion
+
+
+## Env variables
+
+export HISTCONTROL=ignoredups:ignorespace
+
+# Use vim if available.
+if [ "$(which vim 2>/dev/null)" ]; then
+	export VISUAL='vim'
+	export EDITOR=$VISUAL
+fi
+
 
 ## Prompts/Colors
 
@@ -79,46 +152,6 @@ if "${use_color}" ; then
 else
 	# Show root@ when we don't have colors.
 	PS1='[\u@\h \W]\$ '
-fi
-
-
-## Bash options
-
-# Disable flow control (CTRL-S freezing io).
-stty -ixon
-
-# Append to the history file, don't overwrite it.
-shopt -s histappend
-
-# Check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
-
-# Do not try to <TAB> expand if nothing is typed.
-shopt -s no_empty_cmd_completion
-
-
-## Env variables
-
-export HISTCONTROL=ignoredups:ignorespace
-
-# Use vim if available.
-if [ "$(which vim 2>/dev/null)" ]; then
-	export VISUAL='vim'
-	export EDITOR=$VISUAL
-fi
-
-
-## Other
-
-# Make less more friendly for non-text input files, see lesspipe(1).
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# Enable bash completions.
-[ -r /usr/share/bash-completion/bash_completion   ] && \
-	source /usr/share/bash-completion/bash_completion
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-	source /etc/bash_completion
 fi
 
 
@@ -188,6 +221,19 @@ function extract()
 }
 
 
+## Other
+
+# Make less more friendly for non-text input files, see lesspipe(1).
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# Enable bash completions.
+[ -r /usr/share/bash-completion/bash_completion   ] && \
+	source /usr/share/bash-completion/bash_completion
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+	source /etc/bash_completion
+fi
+
+
 ## Unset
 
 unset use_color
@@ -196,7 +242,6 @@ unset as_script
 
 
 ### OVERIDES
-
 
 # Store all kinds of useful specific overrides and fixes.
 # Use/add/modify per machine whenever needed. Feel
