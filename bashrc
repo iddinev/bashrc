@@ -2,89 +2,13 @@
 #
 # ~/.bashrc
 #
-
-
 # Upstream: https://github.com/iddinev/bashrc
 
 
 
-## Login/Main
+## Login
 
-# Interactive mode = file is sourced. Otherwise = used as a script.
-# Variable is used so bash does not report exit 1 when sourcing the file.
-as_script='no'
-
-if [[ "$-" != *i* ]]; then
-
-	as_script='yes'
-	own_path="$(readlink -f $0)"
-	backup='BACKUP'
-	# bashrc_path="$HOME/.bashrc"
-	bashrc_path="./.bashrc"
-
-	function _bashrc_deploy()
-	{
-		[ -f "$bashrc_path" ] && mv "$bashrc_path" "$bashrc_path"."$backup"
-		mv -v "$own_path" "$bashrc_path"
-		# install plugins
-		_bashrc_source
-	}
-
-	function _bashrc_install()
-	{
-		_bashrc_source
-	}
-
-	function _bashrc_uninstall()
-	{
-		[ -f "$bashrc_path."$backup"" ] && mv "$bashrc_path"."$backup" "$bashrc_path"
-		# delete plugins and git dirs
-		_bashrc_source
-	}
-
-	function _bashrc_source()
-	{
-		echo "# Don't forget to source the (new) .bashrc"
-		echo "source $bashrc_path"
-	}
-
-	function _bashrc_help()
-	{
-		cat <<- _EOF_
-
-		Check the README at
-		https://github.com/iddinev/bashrc
-
-		Usage:
-			-d | --deploy    Download & setup the bashrc & plugins.
-			-i | --install   Download & setup the git repo(s).
-			-u | --uninstall Revert previous bashrc and remove git repo(s) & plugins.
-		_EOF_
-	}
-
-	# Simple argument handling, don't do anythning complicated.
-	case "$1" in
-		-d | --deploy)
-			_bashrc_deploy
-		;;
-		-i | --install)
-			_bashrc_install
-		;;
-		-u | --uninstall)
-			_bashrc_uninstall
-		;;
-		-h | --help)
-			_bashrc_help
-		;;
-		*)
-			_bashrc_help
-			exit 1
-		;;
-	esac
-
-fi
-
-[[ "$as_script" == 'yes' ]] && exit 0
+[[ "$-" != *i* ]] && return
 
 
 ## Bash options
@@ -179,9 +103,15 @@ alias l='ls -CF'
 # fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
-alias git_rc='/usr/bin/git --git-dir=$HOME/.home_configs_git/ --work-tree=$HOME'
+git_rc_repo="$HOME/.home_configs_git/"
+if [[ -d "$git_rc_home" ]]; then
+	alias git_rc='/usr/bin/git --git-dir=$git_rc_repo --work-tree=$HOME'
+fi
 
-alias git_bash='/usr/bin/git --git-dir=$HOME/.bashrc_git/ --work-tree=$HOME'
+git_bash_repo="$HOME/.bashrc_git/"
+if [[ -d "$git_bash_repo" ]]; then
+	alias git_bash='/usr/bin/git --git-dir=$git_bash_repo --work-tree=$HOME'
+fi
 
 alias vim='vim -O'
 
@@ -220,6 +150,77 @@ function extract()
 	fi
 }
 
+# Functions for the main (deploy/install etc) part.
+
+own_path="$(readlink -f $BASH_SOURCE)"
+own_name="$(basename $BASH_SOURCE)"
+backup='BACKUP'
+# bashrc_path="$HOME/.bashrc"
+bashrc_path="./.bashrc"
+
+function _bashrc_deploy()
+{
+	# _bashrc_check_wget || return
+	[ -f "$bashrc_path" ] && mv "$bashrc_path" "$bashrc_path"."$backup"
+	cp -v "$own_path" "$bashrc_path"
+	_bashrc_install_plugins
+	_bashrc_relogin_msg
+}
+
+function _bashrc_install()
+{
+	_bashrc_relogin_msg
+	_bashrc_install_plugins
+}
+
+function _bashrc_uninstall()
+{
+	[ -f "$bashrc_path."$backup"" ] && mv "$bashrc_path"."$backup" "$bashrc_path"
+	# delete plugins and git dirs
+	_bashrc_relogin_msg
+}
+
+function _bashrc_relogin_msg()
+{
+	echo "Consider a relogin to the shell to start in a clean environment."
+}
+
+function _bashrc_install_plugins()
+{
+	true
+}
+
+# function _bashrc_check_wget()
+# {
+	# rc=0
+	# which wget 2>/dev/null 1>%2 || { echo 'wget not found!'; rc=1 }
+	# return $rc
+# }
+
+
+function _bashrc_help()
+{
+	cat <<- _EOF_
+
+	Check the README at
+	https://github.com/iddinev/bashrc
+
+	Usage:
+	$ source bashrc [options]
+
+
+	Options:
+		-d | --deploy    Download & setup the bashrc & plugins.
+		-i | --install   Download & setup the git repo(s).
+		-u | --uninstall Revert previous bashrc and remove git repo(s) & plugins.
+		-h | --help      Show this help message, don't download/setup/modify files.
+		(no option)      Same as '--help'.
+
+	All the options also source the configs.
+	_EOF_
+	_bashrc_relogin_msg
+}
+
 
 ## Other
 
@@ -234,10 +235,38 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 
+## Main
+
+case "$1" in
+	-d | --deploy)
+		_bashrc_deploy
+	;;
+	-i | --install)
+		_bashrc_install
+	;;
+	-u | --uninstall)
+		_bashrc_uninstall
+	;;
+	-h | --help)
+		_bashrc_help
+	;;
+	*)
+		_bashrc_help
+	;;
+esac
+
+
 ## Unset
 
 unset use_color
-unset as_script
+unset own_path
+unset backup
+unset bashrc_path
+unset _bashrc_deploy
+unset _bashrc_install
+unset _bashrc_uninstall
+unset _bashrc_help
+unset _bashrc_relogin_msg
 
 
 
