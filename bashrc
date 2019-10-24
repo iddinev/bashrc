@@ -45,6 +45,7 @@ function _bashrc_deploy()
 		[ -f "$bashrc_path"."$backup_suffix" ] || cp -p "$bashrc_path" "$bashrc_path"."$backup_suffix"
 		wget "$source_dl" -O "$bashrc_path"
 		[[ -d "$local_rc_repo" ]] || git init --bare "$local_rc_repo"
+		[[ -d "$local_bashrc_repo" ]] || git init --bare "$local_bashrc_repo"
 	fi
 	_bashrc_relogin_msg
 }
@@ -57,19 +58,12 @@ function _bashrc_deploy_plugins()
 	_bashrc_relogin_msg
 }
 
-function _bashrc_install()
-{
-	[[ -d "$local_bashrc_repo" ]] || git clone --bare "$source_repo" "$local_bashrc_repo"
-	[[ -d "$local_rc_repo" ]] || git init --bare "$local_rc_repo"
-	_bashrc_deploy
-	_bashrc_deploy_plugins
-}
-
 function _bashrc_uninstall()
 {
 	[ -f "$bashrc_path."$backup_suffix"" ] && mv -v "$bashrc_path"."$backup_suffix" "$bashrc_path"
 	[ -f "$bash_powerline_path" ] && rm -v "$bash_powerline_path"
 	echo 'Delete the git repos manually - first check if you need to save something from them.'
+	echo 'Git repos: $local_rc_repo $local_bashrc_repo'
 	_bashrc_relogin_msg
 }
 
@@ -100,23 +94,19 @@ function _bashrc_help()
 
 
 	Options:
-		-d | --deploy    Download & setup the latest bashrc from github. Can be used for upgrading.
-		-i | --install   Download & setup the latest bashrc github repo. Implies '-p'.
-		-p | --plugins   Download & setup the latest plugins from github. Can be used of upgrading.
-		-u | --uninstall Revert previous bashrc and remove plugins. Git repos have to be removed
-		                 manually.
+		-d | --deploy    Download & setup the latest bashrc from github.
+		-p | --plugins   Download & setup the latest plugins from github.
+		-u | --uninstall Revert previous bashrc and remove plugins.
+		                 Remove leftover local git repos manually.
 		-h | --help      Show this help message, don't download/setup/modify files.
 
-	All the options also source the configs.
+	All the options also source the configs!
 	_EOF_
 }
 
 case "$1" in
 	-d | --deploy)
 		_bashrc_deploy
-	;;
-	-i | --install)
-		_bashrc_install
 	;;
 	-p | --plugins)
 		_bashrc_deploy_plugins
@@ -224,6 +214,7 @@ if [[ -d "$local_rc_repo" ]]; then
 	alias git_rc="/usr/bin/git --git-dir=$local_rc_repo --work-tree=$user_home"
 fi
 
+# Store any local overrides and modifications in a local repo.
 if [[ -d "$local_bashrc_repo" ]]; then
 	alias git_bash="/usr/bin/git --git-dir=$local_bashrc_repo --work-tree=$user_home"
 fi
@@ -312,7 +303,8 @@ unset _bashrc_help
 # free to keep local override files in version control
 # and/or backups.
 
-# '|| true' is needed orotherwise the overall exit code of the sourcing is 1
+# '|| true' is needed otherwise the overall exit code of the sourcing is 1
+# if the file is not presetn.
 [ -f ~/.bashrc_override ] && source ~/.bashrc_override || true
 
 # Some useful overrides that I've picked up so far.
