@@ -18,14 +18,21 @@ Obviously read the whole script before using it.
 
 ## Usage:
 ```bash
-	$ source bashrc [options]
 
+    Check the README at
+    https://github.com/iddinev/bashrc
 
-	Options:
-		-d | --deploy    Download & setup the latest bashrc from github.
-		-p | --plugins   Download & setup the latest plugins from github.
-		-u | --uninstall Revert previous bashrc and remove plugins.
-		-h | --help      Show this help message, don't download/setup/modify files.
+    Usage:
+    1)
+       $ source bashrc:
+            Backup the preexisting .bashrc (if any) and deploy
+            the latest bashrc from the github repo. Makes the
+            functions from 2) available.
+    2)
+        $ bashrc_deploy | bashrc_deploy_plugins | bashrc_uninstall | bashrc_help
+            bashrc_deploy		  - Update to the latest bashrc from github.
+            bashrc_deploy_plugins - Deploy/Update latest plugins from github.
+            bashrc_uninstall	  - Reverts to the old bashrc & removes plugins.
+            bashrc_help			  - Show this help message.
 
-	All the options also source the configs.
 ```

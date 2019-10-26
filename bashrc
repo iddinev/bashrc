@@ -3,6 +3,11 @@
 # ~/.bashrc
 #
 # Upstream/source: https://github.com/iddinev/bashrc
+#
+# Uppercase variables are defined throughout the sections
+# and are ment to be exported. Lowercase variables
+# are defined in the 'Main' section and are internal,
+# they are unset at the end of the file.
 
 
 
@@ -27,98 +32,83 @@ local_bashrc_repo="$user_home/.bashrc.git"
 
 # Upstream/source for this bashrc.
 source_name='bashrc'
-source_dl="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
+source_url="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
 source_repo="https://github.com/iddinev/bashrc"
 
 # Powerline
-bash_powerline_name=".bash_powerline"
-bash_powerline_dl="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
-bash_powerline_repo="https://github.com/iddinev/bash-powerline"
-bash_powerline_path="$user_home/.bash_powerline"
+powerline_name=".bash-powerline"
+powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
+powerline_repo="https://github.com/iddinev/bash-powerline"
+powerline_path="$user_home/.bash_powerline"
 
 # Functions for the main (deploy/install etc) part.
 
-function _bashrc_deploy()
+# This whole 'eval' part is needed in order not to keep any variable definitions in the env.
+eval "function bashrc_deploy()
 {
-	if _bashrc_check_wget; then
+	if which wget 2>/dev/null 1>&2; then
 		# Backup the original bashrc (dont backup updates of this one though).
-		[ -f "$bashrc_path"."$backup_suffix" ] || cp -p "$bashrc_path" "$bashrc_path"."$backup_suffix"
-		wget "$source_dl" -O "$bashrc_path"
-		[[ -d "$local_rc_repo" ]] || git init --bare "$local_rc_repo"
-		[[ -d "$local_bashrc_repo" ]] || git init --bare "$local_bashrc_repo"
+		[ -f \"$bashrc_path\".\"$backup_suffix\" ] || cp -pv \"$bashrc_path\" \"$bashrc_path\".\"$backup_suffix\"
+		wget \"$source_url\" -O \"$bashrc_path\"
+		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
+		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
+		echo ''
+		echo 'Relogin to the shell to start in a clean environment.'
+		echo ''
+	else
+		echo \"wget (needed to download from github) not found!\"
 	fi
-	_bashrc_relogin_msg
-}
+}"
 
-function _bashrc_deploy_plugins()
+eval "function bashrc_deploy_plugins()
 {
-	if _bashrc_check_wget; then
-		wget "$bash_powerline_dl" -O "$user_home/$bash_powerline_name"
+	if which wget 2>/dev/null 1>&2; then
+		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
+		echo ''
+		echo 'Relogin to the shell to start in a clean environment.'
+		echo ''
+	else
+		echo \"wget (needed to download from github) not found!\"
 	fi
-	_bashrc_relogin_msg
-}
+}"
 
-function _bashrc_uninstall()
+eval "function bashrc_uninstall()
 {
-	[ -f "$bashrc_path."$backup_suffix"" ] && mv -v "$bashrc_path"."$backup_suffix" "$bashrc_path"
-	[ -f "$bash_powerline_path" ] && rm -v "$bash_powerline_path"
+	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
+		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
+	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
 	echo 'Delete the git repos manually - first check if you need to save something from them.'
-	echo 'Git repos: $local_rc_repo $local_bashrc_repo'
-	_bashrc_relogin_msg
-}
-
-function _bashrc_relogin_msg()
-{
+	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
 	echo ''
-	echo "Relogin to the shell to start in a clean environment."
+	echo 'Relogin to the shell to start in a clean environment.'
 	echo ''
-}
+}"
 
-function _bashrc_check_wget()
+function bashrc_help()
 {
-	rc=0
-	which wget 2>/dev/null 1>&2 || { echo 'wget not found!'; rc=1; }
-	return $rc
+    cat <<_EOF_
+
+    Check the README at
+    https://github.com/iddinev/bashrc
+
+    Usage:
+    1)
+       $ source bashrc:
+            Backup the preexisting .bashrc (if any) and deploy
+            the latest bashrc from the github repo. Makes the
+            functions from 2) available.
+    2)
+        $ bashrc_deploy | bashrc_deploy_plugins | bashrc_uninstall | bashrc_help
+            bashrc_deploy		  - Update latest bashrc from github.
+            bashrc_deploy_plugins - Deploy/Update latest plugins from github.
+            bashrc_uninstall	  - Reverts to the old bashrc & removes plugins.
+            bashrc_help			  - Show this help message.
+
+_EOF_
 }
 
 
-function _bashrc_help()
-{
-	cat <<- _EOF_
-
-	Check the README at
-	https://github.com/iddinev/bashrc
-
-	Usage:
-	$ source bashrc [options]
-
-
-	Options:
-		-d | --deploy    Download & setup the latest bashrc from github.
-		-p | --plugins   Download & setup the latest plugins from github.
-		-u | --uninstall Revert previous bashrc and remove plugins.
-		                 Remove leftover local git repos manually.
-		-h | --help      Show this help message, don't download/setup/modify files.
-
-	All the options also source the configs!
-	_EOF_
-}
-
-case "$1" in
-	-d | --deploy)
-		_bashrc_deploy
-	;;
-	-p | --plugins)
-		_bashrc_deploy_plugins
-	;;
-	-u | --uninstall)
-		_bashrc_uninstall
-	;;
-	-h | --help)
-		_bashrc_help
-	;;
-esac
-
+[[ "$own_name" == "$source_name" ]] && bashrc_deploy
 
 ## Bash options
 
@@ -175,8 +165,8 @@ case "${TERM}" in
 esac
 
 if "${use_color}" ; then
-	if [ -f "$bash_powerline_path" ]; then
-		source "$bash_powerline_path"
+	if [ -f "$powerline_path" ]; then
+		source "$powerline_path"
 	else
 		PS1='\[\033[01;32m\][\u@\h\[\033[01;34m\] \W]\$\[\033[00m\] '
 	fi
@@ -281,19 +271,12 @@ unset use_color
 unset local_rc_repo
 unset local_bashrc_repo
 unset source_name
-unset source_dl
+unset source_url
 unset source_repo
-unset bash_powerline_name
-unset bash_powerline_dl
-unset bash_powerline_repo
-unset bash_powerline_path
-
-unset _bashrc_deploy
-unset _bashrc_deploy_plugins
-unset _bashrc_install
-unset _bashrc_uninstall
-unset _bashrc_reloging_msg
-unset _bashrc_help
+unset powerline_name
+unset powerline_url
+unset powerline_repo
+unset powerline_path
 
 
 ### OVERIDES
