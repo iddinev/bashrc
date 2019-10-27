@@ -39,34 +39,37 @@ source_repo="https://github.com/iddinev/bashrc"
 powerline_name=".bash-powerline"
 powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
 powerline_repo="https://github.com/iddinev/bash-powerline"
-powerline_path="$user_home/.bash_powerline"
+powerline_path="$user_home/.bash-powerline"
 
 # Functions for the main (deploy/install etc) part.
 
 # This whole 'eval' part is needed in order not to keep any variable definitions in the env.
-eval "function bashrc_deploy()
+eval "function bashrc_update()
 {
-	if which wget 2>/dev/null 1>&2; then
-		# Backup the original bashrc (dont backup updates of this one though).
-		[ -f \"$bashrc_path\".\"$backup_suffix\" ] || cp -pv \"$bashrc_path\" \"$bashrc_path\".\"$backup_suffix\"
-		wget \"$source_url\" -O \"$bashrc_path\"
+	l_relogin='no'
+	if [[ \"\$1\" == \"--create-local-git\" ]] || [[ \"\$1\" == \"-c\" ]]; then
 		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
 		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
-		echo ''
-		echo 'Relogin to the shell to start in a clean environment.'
-		echo ''
+		l_relogin='yes'
 	else
-		echo \"wget (needed to download from github) not found!\"
+		if which wget 2>/dev/null 1>&2; then
+			wget \"$source_url\" -O \"$bashrc_path\"
+			l_relogin='yes'
+		else
+			echo \"wget (needed to download from github) not found!\"
+		fi
 	fi
+	if [[ \"\$l_relogin\" == \"yes\" ]]; then
+		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+	fi
+
 }"
 
-eval "function bashrc_deploy_plugins()
+eval "function bashrc_update_plugins()
 {
 	if which wget 2>/dev/null 1>&2; then
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
-		echo ''
-		echo 'Relogin to the shell to start in a clean environment.'
-		echo ''
+		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 	else
 		echo \"wget (needed to download from github) not found!\"
 	fi
@@ -79,9 +82,7 @@ eval "function bashrc_uninstall()
 	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
 	echo 'Delete the git repos manually - first check if you need to save something from them.'
 	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
-	echo ''
-	echo 'Relogin to the shell to start in a clean environment.'
-	echo ''
+	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 }"
 
 function bashrc_help()
@@ -93,22 +94,43 @@ function bashrc_help()
 
     Usage:
     1)
-       $ source bashrc:
-            Backup the preexisting .bashrc (if any) and deploy
-            the latest bashrc from the github repo. Makes the
-            functions from 2) available.
+      $ source bashrc:
+
+         Sources the configs and makes the functions from 2) available.
+         Backups the preexisting '.bashrc', moves itself to its place.
+         Implies 'bashrc_update -c'.
+
     2)
-        $ bashrc_deploy | bashrc_deploy_plugins | bashrc_uninstall | bashrc_help
-            bashrc_deploy		  - Update latest bashrc from github.
-            bashrc_deploy_plugins - Deploy/Update latest plugins from github.
-            bashrc_uninstall	  - Reverts to the old bashrc & removes plugins.
-            bashrc_help			  - Show this help message.
+      $ bashrc_update [ -c ]
+
+         -c, --create-local-git
+             Create local git repos to manage local \$HOME & .bashrc modifications.
+
+     $ bashrc_update_plugins
+
+         Update to the latest plugins from github.
+
+     $ bashrc_uninstall
+
+         Reverts to the old bashrc & removes plugins.
+         Intentionally does not remove the local git repos.
+         If used, check if you need to save something from them and
+         remove them manually.
+
+     $ bashrc_help
+
+         Show this help message.
 
 _EOF_
 }
 
 
-[[ "$own_name" == "$source_name" ]] && bashrc_deploy
+if [[ "$own_name" == "$source_name" ]]; then
+	# Backup the original bashrc.
+	[ -f \"$bashrc_path\".\"$backup_suffix\" ] || cp -pv \"$bashrc_path\" \"$bashrc_path\".\"$backup_suffix\"
+	mv -v "$own_path" "$bashrc_path"
+	bashrc_update -c
+fi
 
 ## Bash options
 
