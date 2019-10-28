@@ -124,13 +124,13 @@ function bashrc_help()
 _EOF_
 }
 
-
 if [[ "$own_name" == "$source_name" ]]; then
 	# Backup the original bashrc.
 	[ -f \"$bashrc_path\".\"$backup_suffix\" ] || cp -pv \"$bashrc_path\" \"$bashrc_path\".\"$backup_suffix\"
 	mv -v "$own_path" "$bashrc_path"
 	bashrc_update -c
 fi
+
 
 ## Bash options
 
@@ -200,8 +200,6 @@ fi
 
 ## Aliases
 
-[ -f ~/.bash_aliases ] && source ~/.bash_aliases
-
 if "${use_color}" ; then
 	alias ls='ls --color=auto'
 	alias grep='grep --color=auto'
@@ -238,6 +236,8 @@ alias vim='vim -O'
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal'\
 '|| echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+[ -f ~/.bash_aliases ] && source ~/.bash_aliases
+
 
 ## Functions
 
@@ -267,6 +267,7 @@ function extract()
 		echo "'$1' is not a valid file!"
 	fi
 }
+
 
 ## Other
 
@@ -299,6 +300,7 @@ unset powerline_name
 unset powerline_url
 unset powerline_repo
 unset powerline_path
+
 
 
 ### OVERIDES
