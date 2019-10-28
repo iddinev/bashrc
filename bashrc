@@ -32,14 +32,14 @@ local_bashrc_repo="$user_home/.bashrc.git"
 
 # Upstream/source for this bashrc.
 source_name='bashrc'
-source_url="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
 source_repo="https://github.com/iddinev/bashrc"
+source_url="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
 
 # Powerline
 powerline_name=".bash-powerline"
-powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
 powerline_repo="https://github.com/iddinev/bash-powerline"
-powerline_path="$user_home/.bash-powerline"
+powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
+powerline_path="$user_home/$powerline_name"
 
 # Functions for the main (deploy/install etc) part.
 
@@ -210,14 +210,6 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-
-# Fuzzy Finder: https://github.com/junegunn/fzf
-# install git clone --depth 1 https://github.com/junegunn/fzf.git ~/.bash-fzf && ./fzf/install  --no-zsh --no-fish --key-bindings --completion --no-update-rc
-# if [ -f ~/.fzf.bash ]; then
-	# source ~/.fzf.bash
-	# export FZF_COMPLETION_TRIGGER='~~'
-	# export FZF_DEFAULT_OPTS='--exact --tiebreak=begin --preview "[[ $(file --mime {}) =~ binary ]] && echo {} is a binary file || (bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -500"'
-# fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
 if [[ -d "$local_rc_repo" ]]; then
