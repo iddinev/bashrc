@@ -18,7 +18,8 @@
 
 ## Main
 
-user_home="$HOME"
+# user_home="$HOME"
+user_home="."
 own_path="$(readlink -f $BASH_SOURCE)"
 own_name="$(basename $BASH_SOURCE)"
 backup_suffix='BACKUP'
@@ -40,6 +41,13 @@ powerline_name=".bash-powerline"
 powerline_repo="https://github.com/iddinev/bash-powerline"
 powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
 powerline_path="$user_home/$powerline_name"
+
+# Fuzzy Finder
+fuzzyfinder_name=".bash-fuzzyfinder"
+fuzzyfinder_repo="https://github.com/junegunn/fzf"
+fuzzyfinder_url="$fuzzyfinder_repo"
+fuzzyfinder_path="$user_home/$fuzzyfinder_name"
+
 
 # Functions for the main (deploy/install etc) part.
 
@@ -68,7 +76,11 @@ eval "function bashrc_update()
 eval "function bashrc_update_plugins()
 {
 	if which wget 2>/dev/null 1>&2; then
+		# Powerline
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
+		# Fuzzy Finder
+		git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
+			"$fuzzyfinder_path/install"
 		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 	else
 		echo \"wget (needed to download from github) not found!\"
