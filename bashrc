@@ -13,15 +13,15 @@
 
 ## Login
 
-[[ "$-" != *i* ]] && return
+[[ $- != *i* ]] && return
 
 
 ## Main
 
-# user_home="$HOME"
-user_home="."
-own_path="$(readlink -f $BASH_SOURCE)"
-own_name="$(basename $BASH_SOURCE)"
+user_home="$HOME"
+own_path=$(readlink -f "${BASH_SOURCE[0]}")
+own_name=$(basename "${BASH_SOURCE[0]}")
+own_dir=$(dirname "${BASH_SOURCE[0]}")
 backup_suffix='BACKUP'
 bashrc_name=".bashrc"
 bashrc_path="$user_home/$bashrc_name"
@@ -55,7 +55,7 @@ fuzzyfinder_path="$user_home/$fuzzyfinder_name"
 eval "function bashrc_update()
 {
 	l_relogin='no'
-	if [[ \"\$1\" == \"--create-local-git\" ]] || [[ \"\$1\" == \"-c\" ]]; then
+	if [[ \$1 == --create-local-git ]] || [[ \$1 == -c ]]; then
 		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
 		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
 		l_relogin='yes'
@@ -79,8 +79,8 @@ eval "function bashrc_update_plugins()
 		# Powerline
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
 		# Fuzzy Finder
-		git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
-			"$fuzzyfinder_path/install"
+		# git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
+			# "$fuzzyfinder_path/install"
 		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 	else
 		echo \"wget (needed to download from github) not found!\"
@@ -136,11 +136,19 @@ function bashrc_help()
 _EOF_
 }
 
-if [[ "$own_name" == "$source_name" ]]; then
+if [[ $own_name == "$source_name" ]]; then
 	# Backup the original bashrc.
-	[ -f \"$bashrc_path\".\"$backup_suffix\" ] || cp -pv \"$bashrc_path\" \"$bashrc_path\".\"$backup_suffix\"
+	[ -f "$bashrc_path"."$backup_suffix" ] || cp -pv "$bashrc_path" "$bashrc_path"."$backup_suffix"
 	mv -v "$own_path" "$bashrc_path"
-	bashrc_update -c
+	bashrc_update --create-local-git
+	if [ 0 -eq "$(find $own_dir\
+	-mindepth 1 -maxdepth 1 \! -name '.git' -a \! -name\
+	$own_name -a \! -name README.md | wc -l)" ]; then
+		echo "Removing the (uneeded) git repo '$own_dir'."
+		rm -rf "$own_dir/.git"
+		rm "$own_dir/README.md"
+		rmdir -v "$own_dir"
+	fi
 fi
 
 
@@ -165,7 +173,7 @@ shopt -s no_empty_cmd_completion
 export HISTCONTROL=ignoredups:ignorespace
 
 # Use vim if available.
-if [ "$(which vim 2>/dev/null)" ]; then
+if [ "$(command -v vim 1>/dev/null)" ]; then
 	export VISUAL='vim'
 	export EDITOR=$VISUAL
 fi
@@ -199,7 +207,7 @@ case "${TERM}" in
 esac
 
 if "${use_color}" ; then
-	if [ -f "$powerline_path" ]; then
+	if [[ -f $powerline_path ]]; then
 		source "$powerline_path"
 	else
 		PS1='\[\033[01;32m\][\u@\h\[\033[01;34m\] \W]\$\[\033[00m\] '
@@ -220,16 +228,22 @@ if "${use_color}" ; then
 fi
 
 alias ll='ls -alF'
-alias la='ls -A'
+alias la='ls -AF'
 alias l='ls -CF'
+alias less='less -R'
+
+if [ "$(command -v xclip 1>/dev/null)" ]; then
+	alias setclip="xclip -selection c"
+	alias getclip="xclip -selection c -o"
+fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
-if [[ -d "$local_rc_repo" ]]; then
+if [[ -d $local_rc_repo ]]; then
 	alias git_rc="/usr/bin/git --git-dir=$local_rc_repo --work-tree=$user_home"
 fi
 
 # Store any local overrides and modifications in a local repo.
-if [[ -d "$local_bashrc_repo" ]]; then
+if [[ -d $local_bashrc_repo ]]; then
 	alias git_bash="/usr/bin/git --git-dir=$local_bashrc_repo --work-tree=$user_home"
 fi
 
@@ -250,22 +264,21 @@ function extract()
 {
 	if [ -f "$1" ] ; then
 		case "$1" in
-		*.tar.bz2)     tar xvjf $1                ;;
-		*.tar.gz)      tar xvzf $1                ;;
-		*.tar.xz)      tar xvJf $1                ;;
-		*.bz2)         bunzip2 $1                 ;;
-		*.rar)         unrar x $1                 ;;
-		*.gz)          gunzip $1                  ;;
-		*.tar)         tar xvf $1                 ;;
-		*.tbz2)        tar xvjf $1                ;;
-		*.tgz)         tar xvzf $1                ;;
-		*.zip)         unzip $1                   ;;
-		*.Z)           uncompress $1              ;;
-		*.7z)          7z x $1                    ;;
-		*.rpm)         rpm2cpio "$1" | cpio -idmv ;;
-		*.deb)         ar -xv $1                  ;;
-		*.pkg.tar.xz)  tar xvJf $1                ;;
-		*)             echo "'$1' cannot be extracted via >extract<" ;;
+		*.tar.bz2)     tar xvjf "$1"                ;;
+		*.tar.gz)      tar xvzf "$1"                ;;
+		*.tar.xz)      tar xvJf "$1"                ;;
+		*.bz2)         bunzip2 "$1"                 ;;
+		*.rar)         unrar x "$1"                 ;;
+		*.gz)          gunzip "$1"                  ;;
+		*.tar)         tar xvf "$1"                 ;;
+		*.tbz2)        tar xvjf "$1"                ;;
+		*.tgz)         tar xvzf "$1"                ;;
+		*.zip)         unzip "$1"                   ;;
+		*.Z)           uncompress "$1"              ;;
+		*.7z)          7z x "$1"                    ;;
+		*.rpm)         rpm2cpio "$1" | cpio -idmv   ;;
+		*.deb)         ar -xv "$1"                  ;;
+		*)             echo "'$1' cannot be extracted via >${FUNCNAME[0]}<" ;;
 		esac
 	else
 		echo "'$1' is not a valid file!"
