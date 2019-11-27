@@ -232,7 +232,7 @@ alias la='ls -AF'
 alias l='ls -CF'
 alias less='less -R'
 
-if [ "$(command -v xclip 1>/dev/null)" ]; then
+if command -v xclip 1>/dev/null; then
 	alias setclip="xclip -selection c"
 	alias getclip="xclip -selection c -o"
 fi
