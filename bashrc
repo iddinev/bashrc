@@ -21,7 +21,7 @@
 user_home="$HOME"
 own_path=$(readlink -f "${BASH_SOURCE[0]}")
 own_name=$(basename "${BASH_SOURCE[0]}")
-own_dir=$(dirname "${BASH_SOURCE[0]}")
+own_dir=$(dirname "$own_path")
 backup_suffix='BACKUP'
 bashrc_name=".bashrc"
 bashrc_path="$user_home/$bashrc_name"
@@ -49,53 +49,7 @@ fuzzyfinder_url="$fuzzyfinder_repo"
 fuzzyfinder_path="$user_home/$fuzzyfinder_name"
 
 
-# Functions for the main (deploy/install etc) part.
-
-# This whole 'eval' part is needed in order not to keep any variable definitions in the env.
-eval "function bashrc_update()
-{
-	l_relogin='no'
-	if [[ \$1 == --create-local-git ]] || [[ \$1 == -c ]]; then
-		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
-		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
-		l_relogin='yes'
-	else
-		if which wget 2>/dev/null 1>&2; then
-			wget \"$source_url\" -O \"$bashrc_path\"
-			l_relogin='yes'
-		else
-			echo \"wget (needed to download from github) not found!\"
-		fi
-	fi
-	if [[ \"\$l_relogin\" == \"yes\" ]]; then
-		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
-	fi
-
-}"
-
-eval "function bashrc_update_plugins()
-{
-	if which wget 2>/dev/null 1>&2; then
-		# Powerline
-		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
-		# Fuzzy Finder
-		# git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
-			# "$fuzzyfinder_path/install"
-		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
-	else
-		echo \"wget (needed to download from github) not found!\"
-	fi
-}"
-
-eval "function bashrc_uninstall()
-{
-	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
-		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
-	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
-	echo 'Delete the git repos manually - first check if you need to save something from them.'
-	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
-	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
-}"
+# Functions for the main (deploy/install etc.) part.
 
 function bashrc_help()
 {
@@ -136,14 +90,63 @@ function bashrc_help()
 _EOF_
 }
 
+# This whole 'eval' part is needed in order not to keep any variable definitions in the env.
+eval "function bashrc_update()
+{
+	l_relogin='no'
+	if [[ \$1 == --create-local-git ]] || [[ \$1 == -c ]]; then
+		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
+		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
+		l_relogin='yes'
+	else
+		if command -v wget 1>/dev/null; then
+			wget \"$source_url\" -O \"$bashrc_path\"
+			l_relogin='yes'
+		else
+			echo \"wget (needed to download from github) not found!\"
+		fi
+	fi
+	if [[ \"\$l_relogin\" == \"yes\" ]]; then
+		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+	fi
+
+}"
+
+eval "function bashrc_update_plugins()
+{
+	if command -v wget 1>/dev/null; then
+		# Powerline
+		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
+		# Fuzzy Finder
+		# git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
+			# "$fuzzyfinder_path/install"
+		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+	else
+		echo \"wget (needed to download from github) not found!\"
+	fi
+}"
+
+eval "function bashrc_uninstall()
+{
+	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
+		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
+	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
+	echo 'Delete the git repos manually - first check if you need to save something from them.'
+	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
+	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+}"
+
 if [[ $own_name == "$source_name" ]]; then
 	# Backup the original bashrc.
 	[ -f "$bashrc_path"."$backup_suffix" ] || cp -pv "$bashrc_path" "$bashrc_path"."$backup_suffix"
 	mv -v "$own_path" "$bashrc_path"
-	bashrc_update --create-local-git
+	echo -e '\nUse "bashrc_update --create-local-git" to create local git repos'
+	echo -e 'to manage local $HOME & .bashrc modifications.\n'
+	echo -e 'Relogin to the shell to start in a clean environment.\n'
 	if [ 0 -eq "$(find $own_dir\
 	-mindepth 1 -maxdepth 1 \! -name '.git' -a \! -name\
-	$own_name -a \! -name README.md | wc -l)" ]; then
+	$own_name -a \! -name README.md | wc -l)" ] &&\
+	[ $(readlink -f "$PWD") != "$own_dir" ]; then
 		echo "Removing the (uneeded) git repo '$own_dir'."
 		rm -rf "$own_dir/.git"
 		rm "$own_dir/README.md"
@@ -254,7 +257,9 @@ alias vim='vim -O'
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal'\
 '|| echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-[ -f ~/.bash_aliases ] && source ~/.bash_aliases
+# '|| true' is needed otherwise the overall exit code of the sourcing is 1
+# if the file is not presetn.
+[ -f ~/.bash_aliases ] && source ~/.bash_aliases || true
 
 
 ## Functions
@@ -358,3 +363,5 @@ unset powerline_path
 ## Unset
 
 # unset TERM_TITLE
+
+### OVERIDES

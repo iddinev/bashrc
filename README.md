@@ -4,14 +4,14 @@ Feel free to fork/modify/borrow to cover your own needs.
 Obviously read the whole script before using it.
 
 ## Features
-- The script is intentionaly not named '.bashrc' so users can/have the option to save their initial .bashrc
+- The script is intentionaly not named '.bashrc' so users can (and have the option to) save their initial .bashrc
   befure using this one (and have the option to clean/revert to their configs if they don't like this one).
 - The script can deploy the .bashrc configs separately from the plugin configs. Sources are fetched
   from github using wget.
-- The 1st time the script is manually sourced it backups the preexisting .bashrc (if any) and
-  creates 2 local git repos: to manage config files in $HOME and to manage
-  local overrides/additions of the .bashrc itself. Afterwards it moves itself to '$HOME/.bahsrc'.
-- The local git repos can be created at any other time.
+- The 1st time the script is manually sourced it backups the preexisting .bashrc (if any),
+  afterwards it moves itself to '$HOME/.bahsrc' and deletes the now uneeded git dir.
+- Local git repos to manage bashrc overrides/additions and modifications of the $HOME
+  can be created (and have command aliases).
 - When reverting, the local repos are intentionally not removed
   so the user can double check if something has to be saved before removing.
 - Minimal env clutter - the internal functions deployed by the script are eval'ed
