@@ -13,7 +13,7 @@ Obviously read the whole script before using it.
   local overrides/additions of the .bashrc itself. Afterwards it moves itself to '$HOME/.bahsrc'.
 - The local git repos can be created at any other time.
 - When reverting, the local repos are intentionally not removed
-  so the user can double check if something has to be saved before removing.
+  so the user can double check if something has to be saved before removing them.
 - Minimal env clutter - the internal functions deployed by the script are eval'ed
   so they don't need any variables to remain exported just for them. Internal variables are
   unset at the end of the script.
@@ -41,7 +41,7 @@ Obviously read the whole script before using it.
          -c, --create-local-git
              Create local git repos to manage local \$HOME & .bashrc modifications.
 
-     $ bashrc_update_plugins
+     $ bashrc_plugins_update
 
          Update to the latest plugins from github.
 

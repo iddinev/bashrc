@@ -60,11 +60,11 @@ eval "function bashrc_update()
 		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
 		l_relogin='yes'
 	else
-		if which wget 2>/dev/null 1>&2; then
+		if [ \"\$\(command -v wget 1>/dev/null\)\" ]; then
 			wget \"$source_url\" -O \"$bashrc_path\"
 			l_relogin='yes'
 		else
-			echo \"wget (needed to download from github) not found!\"
+			echo \"wget (used to download stuff from github) not found!\"
 		fi
 	fi
 	if [[ \"\$l_relogin\" == \"yes\" ]]; then
@@ -73,9 +73,9 @@ eval "function bashrc_update()
 
 }"
 
-eval "function bashrc_update_plugins()
+eval "function bashrc_plugins_update()
 {
-	if which wget 2>/dev/null 1>&2; then
+	if [ \"\$\(command -v wget 1>/dev/null\)\" ]; then
 		# Powerline
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
 		# Fuzzy Finder
@@ -83,7 +83,7 @@ eval "function bashrc_update_plugins()
 			# "$fuzzyfinder_path/install"
 		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 	else
-		echo \"wget (needed to download from github) not found!\"
+		echo \"wget (used to download stuff from github) not found!\"
 	fi
 }"
 
@@ -118,7 +118,7 @@ function bashrc_help()
          -c, --create-local-git
              Create local git repos to manage local \$HOME & .bashrc modifications.
 
-     $ bashrc_update_plugins
+     $ bashrc_plugins_update
 
          Update to the latest plugins from github.
 
