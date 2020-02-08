@@ -79,9 +79,17 @@ eval "function bashrc_plugins_update()
 		# Powerline
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
 		# Fuzzy Finder
-		# git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
-			# "$fuzzyfinder_path/install"
-		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+		# We handle the appropriate sourcing ourselves.
+		if [ -f \"$fuzzyfinder_path\" ]; then
+			l_pwd=\$\(pwd\)
+			cd \"$fuzzyfinder_path\" && git pull && \
+				./install --64 --bin
+			cd \"\$l_pwd\"
+		else
+			git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
+				"$fuzzyfinder_path/install" --64 --bin
+			echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+		fi
 	else
 		echo \"wget (used to download stuff from github) not found!\"
 	fi
@@ -92,6 +100,7 @@ eval "function bashrc_uninstall()
 	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
 		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
 	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
+	[ -f \"$fuzzyfinder_path\" ] && rm -v \"$fuzzyfinder_path\"
 	echo 'Delete the git repos manually - first check if you need to save something from them.'
 	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
 	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
@@ -267,6 +276,7 @@ function extract()
 		*.tar.bz2)     tar xvjf "$1"                ;;
 		*.tar.gz)      tar xvzf "$1"                ;;
 		*.tar.xz)      tar xvJf "$1"                ;;
+		*.tar.zst)     tar -I zstd -xvf "$1"        ;;
 		*.bz2)         bunzip2 "$1"                 ;;
 		*.rar)         unrar x "$1"                 ;;
 		*.gz)          gunzip "$1"                  ;;
@@ -292,10 +302,25 @@ function extract()
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # Enable bash completions.
-[ -r /usr/share/bash-completion/bash_completion   ] && \
+[ -r /usr/share/bash-completion/bash_completion ] && \
 	source /usr/share/bash-completion/bash_completion
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 	source /etc/bash_completion
+fi
+
+# No need to have this in a separate file as per fzf's install script.
+if [ -d "$fuzzyfinder_path" ]; then
+	if [[ ! "$PATH" == *"$fuzzyfinder_path"/bin* ]]; then
+		export PATH="${PATH:+${PATH}:}$fuzzyfinder_path/bin"
+	fi
+
+	# Auto-completion
+	# ---------------
+	[[ $- == *i* ]] && source "$fuzzyfinder_path/shell/completion.bash" 2>/dev/null
+
+	# Key bindings
+	# ------------
+	source "$fuzzyfinder_path/shell/key-bindings.bash"
 fi
 
 
@@ -317,6 +342,10 @@ unset powerline_name
 unset powerline_url
 unset powerline_repo
 unset powerline_path
+unset fuzzyfinder_name
+unset fuzzyfinder_url
+unset fuzzyfinder_repo
+unset fuzzyfinder_path
 
 
 

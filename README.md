@@ -22,6 +22,9 @@ Obviously read the whole script before using it.
 - Powerline:
   https://github.com/iddinev/bash-powerline  
 
+- fzf:
+  https://github.com/junegunn/fzf
+
 ## Usage:
 ```bash
 
