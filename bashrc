@@ -100,7 +100,8 @@ eval "function bashrc_uninstall()
 	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
 		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
 	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
-	[ -f \"$fuzzyfinder_path\" ] && rm -v \"$fuzzyfinder_path\"
+	[ -d \"$fuzzyfinder_path\" ] && rm -rf \"$fuzzyfinder_path\" && \
+		echo \"removed '$fuzzyfinder_path'\"
 	echo 'Delete the git repos manually - first check if you need to save something from them.'
 	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
 	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
@@ -321,6 +322,9 @@ if [ -d "$fuzzyfinder_path" ]; then
 	# Key bindings
 	# ------------
 	source "$fuzzyfinder_path/shell/key-bindings.bash"
+
+	export FZF_COMPLETION_TRIGGER='``'
+	export FZF_DEFAULT_OPTS='--reverse --height=20% --no-bold --color="gutter:-1,fg+:#81D4FA,bg+:-1"'
 fi
 
 
