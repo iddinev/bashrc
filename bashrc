@@ -21,7 +21,7 @@
 user_home="$HOME"
 own_path=$(readlink -f "${BASH_SOURCE[0]}")
 own_name=$(basename "${BASH_SOURCE[0]}")
-own_dir=$(dirname "$own_path")
+own_dir=$(dirname "${BASH_SOURCE[0]}")
 backup_suffix='BACKUP'
 bashrc_name=".bashrc"
 bashrc_path="$user_home/$bashrc_name"
@@ -49,7 +49,63 @@ fuzzyfinder_url="$fuzzyfinder_repo"
 fuzzyfinder_path="$user_home/$fuzzyfinder_name"
 
 
-# Functions for the main (deploy/install etc.) part.
+# Functions for the main (deploy/install etc) part.
+
+# This whole 'eval' part is needed in order not to keep any variable definitions in the env.
+eval "function bashrc_update()
+{
+	l_relogin='no'
+	if [[ \$1 == --create-local-git ]] || [[ \$1 == -c ]]; then
+		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
+		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
+		l_relogin='yes'
+	else
+		if [ \"\$\(command -v wget 1>/dev/null\)\" ]; then
+			wget \"$source_url\" -O \"$bashrc_path\"
+			l_relogin='yes'
+		else
+			echo \"wget (used to download stuff from github) not found!\"
+		fi
+	fi
+	if [[ \"\$l_relogin\" == \"yes\" ]]; then
+		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+	fi
+
+}"
+
+eval "function bashrc_plugins_update()
+{
+	if [ \"\$\(command -v wget 1>/dev/null\)\" ]; then
+		# Powerline
+		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
+		# Fuzzy Finder
+		# We handle the appropriate sourcing ourselves.
+		if [ -f \"$fuzzyfinder_path\" ]; then
+			l_pwd=\$\(pwd\)
+			cd \"$fuzzyfinder_path\" && git pull && \
+				./install --64 --bin
+			cd \"\$l_pwd\"
+		else
+			git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
+				"$fuzzyfinder_path/install" --64 --bin
+			echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+		fi
+	else
+		echo \"wget (used to download stuff from github) not found!\"
+	fi
+}"
+
+eval "function bashrc_uninstall()
+{
+	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
+		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
+	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
+	[ -d \"$fuzzyfinder_path\" ] && rm -rf \"$fuzzyfinder_path\" && \
+		echo \"removed '$fuzzyfinder_path'\"
+	echo 'Delete the git repos manually - first check if you need to save something from them.'
+	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
+	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+}"
 
 function bashrc_help()
 {
@@ -72,7 +128,7 @@ function bashrc_help()
          -c, --create-local-git
              Create local git repos to manage local \$HOME & .bashrc modifications.
 
-     $ bashrc_update_plugins
+     $ bashrc_plugins_update
 
          Update to the latest plugins from github.
 
@@ -90,59 +146,11 @@ function bashrc_help()
 _EOF_
 }
 
-# This whole 'eval' part is needed in order not to keep any variable definitions in the env.
-eval "function bashrc_update()
-{
-	l_relogin='no'
-	if [[ \$1 == --create-local-git ]] || [[ \$1 == -c ]]; then
-		[[ -d \"$local_rc_repo\" ]] || git init --bare \"$local_rc_repo\"
-		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
-		l_relogin='yes'
-	else
-		if command -v wget 1>/dev/null; then
-			wget \"$source_url\" -O \"$bashrc_path\"
-			l_relogin='yes'
-		else
-			echo \"wget (needed to download from github) not found!\"
-		fi
-	fi
-	if [[ \"\$l_relogin\" == \"yes\" ]]; then
-		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
-	fi
-
-}"
-
-eval "function bashrc_update_plugins()
-{
-	if command -v wget 1>/dev/null; then
-		# Powerline
-		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
-		# Fuzzy Finder
-		# git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
-			# "$fuzzyfinder_path/install"
-		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
-	else
-		echo \"wget (needed to download from github) not found!\"
-	fi
-}"
-
-eval "function bashrc_uninstall()
-{
-	[ -f \"$bashrc_path.$backup_suffix\" ] && mv -v \
-		\"$bashrc_path.$backup_suffix\" \"$bashrc_path\"
-	[ -f \"$powerline_path\" ] && rm -v \"$powerline_path\"
-	echo 'Delete the git repos manually - first check if you need to save something from them.'
-	echo \"Git repos: $local_rc_repo $local_bashrc_repo\"
-	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
-}"
-
 if [[ $own_name == "$source_name" ]]; then
 	# Backup the original bashrc.
 	[ -f "$bashrc_path"."$backup_suffix" ] || cp -pv "$bashrc_path" "$bashrc_path"."$backup_suffix"
 	mv -v "$own_path" "$bashrc_path"
-	echo -e '\nUse "bashrc_update --create-local-git" to create local git repos'
-	echo -e 'to manage local $HOME & .bashrc modifications.\n'
-	echo -e 'Relogin to the shell to start in a clean environment.\n'
+	bashrc_update --create-local-git
 	if [ 0 -eq "$(find $own_dir\
 	-mindepth 1 -maxdepth 1 \! -name '.git' -a \! -name\
 	$own_name -a \! -name README.md | wc -l)" ] &&\
@@ -272,6 +280,7 @@ function extract()
 		*.tar.bz2)     tar xvjf "$1"                ;;
 		*.tar.gz)      tar xvzf "$1"                ;;
 		*.tar.xz)      tar xvJf "$1"                ;;
+		*.tar.zst)     tar -I zstd -xvf "$1"        ;;
 		*.bz2)         bunzip2 "$1"                 ;;
 		*.rar)         unrar x "$1"                 ;;
 		*.gz)          gunzip "$1"                  ;;
@@ -297,10 +306,28 @@ function extract()
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # Enable bash completions.
-[ -r /usr/share/bash-completion/bash_completion   ] && \
+[ -r /usr/share/bash-completion/bash_completion ] && \
 	source /usr/share/bash-completion/bash_completion
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 	source /etc/bash_completion
+fi
+
+# No need to have this in a separate file as per fzf's install script.
+if [ -d "$fuzzyfinder_path" ]; then
+	if [[ ! "$PATH" == *"$fuzzyfinder_path"/bin* ]]; then
+		export PATH="${PATH:+${PATH}:}$fuzzyfinder_path/bin"
+	fi
+
+	# Auto-completion
+	# ---------------
+	[[ $- == *i* ]] && source "$fuzzyfinder_path/shell/completion.bash" 2>/dev/null
+
+	# Key bindings
+	# ------------
+	source "$fuzzyfinder_path/shell/key-bindings.bash"
+
+	export FZF_COMPLETION_TRIGGER='``'
+	export FZF_DEFAULT_OPTS='--reverse --height=20% --no-bold --color="gutter:-1,fg+:#81D4FA,bg+:-1"'
 fi
 
 
@@ -322,6 +349,10 @@ unset powerline_name
 unset powerline_url
 unset powerline_repo
 unset powerline_path
+unset fuzzyfinder_name
+unset fuzzyfinder_url
+unset fuzzyfinder_repo
+unset fuzzyfinder_path
 
 
 
@@ -363,5 +394,3 @@ unset powerline_path
 ## Unset
 
 # unset TERM_TITLE
-
-### OVERIDES
