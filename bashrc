@@ -80,8 +80,8 @@ eval "function bashrc_plugins_update()
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
 		# Fuzzy Finder
 		# We handle the appropriate sourcing ourselves.
-		if [ -f \"$fuzzyfinder_path\" ]; then
-			l_pwd=\$\(pwd\)
+		if [ -d \"$fuzzyfinder_path\" ]; then
+			l_pwd=\$(pwd)
 			cd \"$fuzzyfinder_path\" && git pull && \
 				./install --64 --bin
 			cd \"\$l_pwd\"
