@@ -244,8 +244,8 @@ alias l='ls -CF'
 alias less='less -R'
 
 if command -v xclip 1>/dev/null; then
-	alias setclip="xclip -selection c"
-	alias getclip="xclip -selection c -o"
+	alias copyclip="xclip -selection c"
+	alias pasteclip="xclip -selection c -o"
 fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
@@ -262,8 +262,9 @@ alias vim='vim -O'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal'\
-'|| echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal \
+	|| echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
 
 # '|| true' is needed otherwise the overall exit code of the sourcing is 1
 # if the file is not presetn.
@@ -327,7 +328,14 @@ if [ -d "$fuzzyfinder_path" ]; then
 	source "$fuzzyfinder_path/shell/key-bindings.bash"
 
 	export FZF_COMPLETION_TRIGGER='``'
-	export FZF_DEFAULT_OPTS='--reverse --height=20% --no-bold --color="gutter:-1,fg+:#81D4FA,bg+:-1"'
+	# Minimalistic look for the fzf menu.
+	export FZF_DEFAULT_OPTS='--reverse --exact --height=20% --no-bold
+		--color="gutter:-1,fg+:#81D4FA,bg+:-1"'
+	# Slightly better (than the default) ATL_C.
+	export FZF_ALT_C_COMMAND="command find -L . -mindepth 1 \\( -fstype 'sysfs' -o \
+		-fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' -o \
+		-name .git -prune -o -name .hg -prune -o -name .svn \\) -prune \
+		-o -type d -print 2> /dev/null | cut -b3-"
 fi
 
 
