@@ -332,10 +332,10 @@ if [ -d "$fuzzyfinder_path" ]; then
 	export FZF_DEFAULT_OPTS='--reverse --exact --height=20% --no-bold
 		--color="gutter:-1,fg+:#81D4FA,bg+:-1"'
 	# Slightly better (than the default) ATL_C.
-	export FZF_ALT_C_COMMAND="command find -L . -mindepth 1 \\( -fstype 'sysfs' -o \
+	export FZF_ALT_C_COMMAND="command find -L ~ -mindepth 1 \\( -fstype 'sysfs' -o \
 		-fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' -o \
 		-name .git -prune -o -name .hg -prune -o -name .svn \\) -prune \
-		-o -type d -print 2> /dev/null | cut -b3-"
+		-o -type d -print 2> /dev/null"
 fi
 
 
