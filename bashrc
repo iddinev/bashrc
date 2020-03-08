@@ -154,7 +154,7 @@ if [[ $own_name == "$source_name" ]]; then
 	if [ 0 -eq "$(find $own_dir\
 	-mindepth 1 -maxdepth 1 \! -name '.git' -a \! -name\
 	$own_name -a \! -name README.md | wc -l)" ] &&\
-	[ $(readlink -f "$PWD") != "$own_dir" ]; then
+	[ "$(readlink -f $PWD)" != "$own_dir" ]; then
 		echo "Removing the (uneeded) git repo '$own_dir'."
 		rm -rf "$own_dir/.git"
 		rm "$own_dir/README.md"
@@ -214,7 +214,7 @@ if type -P dircolors >/dev/null ; then
 fi
 
 case "${TERM}" in
-	[aEkx]term*|rxvt*|gnome*|konsole*|screen|cons25|*color|*interix|xfce*) use_color=true;;
+	[aEkx]term*|rxvt*|gnome*|konsole*|screen|cons25|*color|*interix|xfce*|linux) use_color=true;;
 esac
 
 if "${use_color}" ; then
