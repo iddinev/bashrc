@@ -301,18 +301,9 @@ function extract()
 }
 
 
-## Other
+## Plugins
 
-# Make less more friendly for non-text input files, see lesspipe(1).
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# Enable bash completions.
-[ -r /usr/share/bash-completion/bash_completion ] && \
-	source /usr/share/bash-completion/bash_completion
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-	source /etc/bash_completion
-fi
-
+# FZF
 # No need to have this in a separate file as per fzf's install script.
 if [ -d "$fuzzyfinder_path" ]; then
 	if [[ ! "$PATH" == *"$fuzzyfinder_path"/bin* ]]; then
@@ -336,6 +327,27 @@ if [ -d "$fuzzyfinder_path" ]; then
 		-fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' -o \
 		-name .git -prune -o -name .hg -prune -o -name .svn \\) -prune \
 		-o -type d -print 2> /dev/null"
+
+	_fzf_setup_completion path readlink
+
+	# Easily copy full links from anywhere in the home dir to the clipboard.
+	alias freadlink="command find -L ~ -mindepth 1 \
+		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
+		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
+		fzf | xargs readlink -f | xargs echo -n | xclip -selection c"
+fi
+
+
+## Other
+
+# Make less more friendly for non-text input files, see lesspipe(1).
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# Enable bash completions.
+[ -r /usr/share/bash-completion/bash_completion ] && \
+	source /usr/share/bash-completion/bash_completion
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+	source /etc/bash_completion
 fi
 
 
