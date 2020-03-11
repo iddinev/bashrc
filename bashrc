@@ -184,7 +184,7 @@ shopt -s no_empty_cmd_completion
 export HISTCONTROL=ignoredups:ignorespace
 
 # Use vim if available.
-if [ "$(command -v vim 1>/dev/null)" ]; then
+if command -v vim 1>/dev/null; then
 	export VISUAL='vim'
 	export EDITOR=$VISUAL
 fi
