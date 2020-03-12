@@ -37,6 +37,8 @@ source_repo="https://github.com/iddinev/bashrc"
 source_url="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
 
 # Powerline
+# Colors are picked from my custom material theme:
+# https://gist.github.com/iddinev/8998241c16642f7502d1e1dc511e7c68
 powerline_name=".bash-powerline"
 powerline_repo="https://github.com/iddinev/bash-powerline"
 powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
@@ -60,7 +62,7 @@ eval "function bashrc_update()
 		[[ -d \"$local_bashrc_repo\" ]] || git init --bare \"$local_bashrc_repo\"
 		l_relogin='yes'
 	else
-		if [ \"\$\(command -v wget 1>/dev/null\)\" ]; then
+		if command -v wget 1>/dev/null; then
 			wget \"$source_url\" -O \"$bashrc_path\"
 			l_relogin='yes'
 		else
@@ -75,7 +77,7 @@ eval "function bashrc_update()
 
 eval "function bashrc_plugins_update()
 {
-	if [ \"\$\(command -v wget 1>/dev/null\)\" ]; then
+	if command -v wget 1>/dev/null; then
 		# Powerline
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
 		# Fuzzy Finder
@@ -319,7 +321,7 @@ if [ -d "$fuzzyfinder_path" ]; then
 	source "$fuzzyfinder_path/shell/key-bindings.bash"
 
 	export FZF_COMPLETION_TRIGGER='``'
-	# Minimalistic look for the fzf menu.
+	# Minimalistic look for the fzf menu, colors are based on my material theme.
 	export FZF_DEFAULT_OPTS='--reverse --exact --height=20% --no-bold
 		--color="gutter:-1,fg+:#81D4FA,bg+:-1"'
 	# Slightly better (than the default) ATL_C.
