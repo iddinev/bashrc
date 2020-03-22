@@ -45,6 +45,7 @@ powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.
 powerline_path="$user_home/$powerline_name"
 
 # Fuzzy Finder
+# Install info, if fzf is not installed through the system's package manager already.
 fuzzyfinder_name=".bash-fuzzyfinder"
 fuzzyfinder_repo="https://github.com/junegunn/fzf"
 fuzzyfinder_url="$fuzzyfinder_repo"
@@ -82,16 +83,20 @@ eval "function bashrc_plugins_update()
 		wget \"$powerline_url\" -O \"$user_home/$powerline_name\"
 		# Fuzzy Finder
 		# We handle the appropriate sourcing ourselves.
-		if [ -d \"$fuzzyfinder_path\" ]; then
-			l_pwd=\$(pwd)
-			cd \"$fuzzyfinder_path\" && git pull && \
-				./install --64 --bin
-			cd \"\$l_pwd\"
+		if ! command -v fzf 1>/dev/null; then
+			if [ -d \"$fuzzyfinder_path\" ]; then
+				l_pwd=\$(pwd)
+				cd \"$fuzzyfinder_path\" && git pull && \
+					./install --64 --bin
+				cd \"\$l_pwd\"
+			else
+				git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
+					"$fuzzyfinder_path/install" --64 --bin
+			fi
 		else
-			git clone --depth 1 "$fuzzyfinder_repo" "$fuzzyfinder_path" && \
-				"$fuzzyfinder_path/install" --64 --bin
-			echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
+			echo 'fzf already available on the system.'
 		fi
+		echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 	else
 		echo \"wget (used to download stuff from github) not found!\"
 	fi
@@ -306,20 +311,33 @@ function extract()
 ## Plugins
 
 # FZF
-# No need to have this in a separate file as per fzf's install script.
-if [ -d "$fuzzyfinder_path" ]; then
-	if [[ ! "$PATH" == *"$fuzzyfinder_path"/bin* ]]; then
-		export PATH="${PATH:+${PATH}:}$fuzzyfinder_path/bin"
-	fi
-
+if command -v fzf 1>/dev/null; then
+	# These paths may vary for different OS'es so adjust them as needed.
 	# Auto-completion
 	# ---------------
-	[[ $- == *i* ]] && source "$fuzzyfinder_path/shell/completion.bash" 2>/dev/null
 
+	[[ $- == *i* ]] && source "/usr/share/fzf/completion.bash" 2>/dev/null
 	# Key bindings
 	# ------------
-	source "$fuzzyfinder_path/shell/key-bindings.bash"
+	source "/usr/share/fzf/key-bindings.bash" 2>/dev/null
+else
+	# No need to have this in a separate file as per fzf's install script.
+	if [ -d "$fuzzyfinder_path" ]; then
+		if [[ ! "$PATH" == *"$fuzzyfinder_path"/bin* ]]; then
+			export PATH="${PATH:+${PATH}:}$fuzzyfinder_path/bin"
+		fi
 
+		# Auto-completion
+		# ---------------
+		[[ $- == *i* ]] && source "$fuzzyfinder_path/shell/completion.bash" 2>/dev/null
+
+		# Key bindings
+		# ------------
+		source "$fuzzyfinder_path/shell/key-bindings.bash" 2>/dev/null
+	fi
+fi
+
+if command -v fzf 1>/dev/null; then
 	export FZF_COMPLETION_TRIGGER='``'
 	# Minimalistic look for the fzf menu, colors are based on my material theme.
 	export FZF_DEFAULT_OPTS='--reverse --exact --height=20% --no-bold
