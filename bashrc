@@ -340,13 +340,21 @@ fi
 if command -v fzf 1>/dev/null; then
 	export FZF_COMPLETION_TRIGGER='``'
 	# Minimalistic look for the fzf menu, colors are based on my material theme.
-	export FZF_DEFAULT_OPTS='--reverse --exact --height=20% --no-bold
-		--color="gutter:-1,fg+:#81D4FA,bg+:-1"'
+	export FZF_DEFAULT_OPTS="--reverse --exact --height=20% --no-bold \
+		--color='16,gutter:-1,bg+:-1' \
+		--color='preview-fg:-1,preview-bg:-1'"
+	export FZF_DEFAULT_COMMAND="command find -L . -type f | cut -c3-"
+
 	# Slightly better (than the default) ATL_C.
+	export FZF_ALT_C_OPTS="$FZF_DEFAULT_OPTS --height=35% --preview  \
+		'ls -C --color=always {} | head -30' --preview-window=:wrap"
 	export FZF_ALT_C_COMMAND="command find -L ~ -mindepth 1 \\( -fstype 'sysfs' -o \
 		-fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' -o \
 		-name .git -prune -o -name .hg -prune -o -name .svn \\) -prune \
 		-o -type d -print 2> /dev/null"
+
+	export FZF_CTRL_T_OPTS="$FZF_DEFAULT_OPTS"
+	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
 
 	_fzf_setup_completion path readlink
 
@@ -355,6 +363,33 @@ if command -v fzf 1>/dev/null; then
 		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
 		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
 		fzf | xargs readlink -f | xargs echo -n | xclip -selection c"
+
+	_fzf_comprun()
+	{
+		local command=$1
+		shift
+
+		case "$command" in
+			cd)
+				fzf "$@" --height=50% --preview \
+				'ls -C --color=always {} | head -30' \
+				--preview-window=:wrap;;
+		export|unset)
+				fzf "$@" --preview "eval 'echo \$'{}" \
+				--preview-window=:wrap;;
+		vim)
+			if command -v bat 1>/dev/null; then
+				fzf "$@" --height=45% \
+				--preview "bat -pp --color=always -r :40 {}" \
+				--preview-window=:wrap
+			else
+				fzf "$@" --height=45% \
+				--preview "head -40 {}" \
+				--preview-window=:wrap
+			fi;;
+		*)            fzf "$@" ;;
+	esac
+	}
 fi
 
 
