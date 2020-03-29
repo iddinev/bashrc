@@ -190,6 +190,11 @@ shopt -s no_empty_cmd_completion
 
 export HISTCONTROL=ignoredups:ignorespace
 
+# Compromise until a better theme is supplied upstream.
+if command -v bat 1>/dev/null; then
+	export BAT_THEME='TwoDark'
+fi
+
 # Use vim if available.
 if command -v vim 1>/dev/null; then
 	export VISUAL='vim'
@@ -339,22 +344,29 @@ fi
 
 if command -v fzf 1>/dev/null; then
 	export FZF_COMPLETION_TRIGGER='``'
-	# Minimalistic look for the fzf menu, colors are based on my material theme.
+	# Minimalistic look for the fzf menu, colors are based on my material theme(s).
+	# Colors are picked to 'work' with both a dark and a light theme.
 	export FZF_DEFAULT_OPTS="--reverse --exact --height=20% --no-bold \
-		--color='16,gutter:-1,bg+:-1' \
-		--color='preview-fg:-1,preview-bg:-1'"
-	export FZF_DEFAULT_COMMAND="command find -L . -type f | cut -c3-"
+		--color='16,gutter:-1,bg+:-1'
+		--color='border:-1,info:-1'"
+	export FZF_DEFAULT_COMMAND="command find -L . -name .git -prune -o -type f | cut -c3-"
 
 	# Slightly better (than the default) ATL_C.
 	export FZF_ALT_C_OPTS="$FZF_DEFAULT_OPTS --height=35% --preview  \
 		'ls -C --color=always {} | head -30' --preview-window=:wrap"
 	export FZF_ALT_C_COMMAND="command find -L ~ -mindepth 1 \\( -fstype 'sysfs' -o \
 		-fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' -o \
-		-name .git -prune -o -name .hg -prune -o -name .svn \\) -prune \
+		-name .git -o -name .hg -o -name .svn \\) -prune \
 		-o -type d -print 2> /dev/null"
 
 	export FZF_CTRL_T_OPTS="$FZF_DEFAULT_OPTS"
 	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
+
+	if command -v bat 1>/dev/null; then
+		export FZF_PREVIEW_COMMAND="bat -pp --color=always -r :40 {}"
+	else
+		export FZF_PREVIEW_COMMAND="head -40 {}"
+	fi
 
 	_fzf_setup_completion path readlink
 
