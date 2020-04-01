@@ -349,7 +349,8 @@ if command -v fzf 1>/dev/null; then
 	export FZF_DEFAULT_OPTS="--reverse --exact --height=20% --no-bold \
 		--color='16,gutter:-1,bg+:-1'
 		--color='border:-1,info:-1'"
-	export FZF_DEFAULT_COMMAND="command find -L . -name .git -prune -o -type f | cut -c3-"
+	# Include hidden files/dirs by default.
+	export FZF_DEFAULT_COMMAND="command find -L . -name .git -prune -o -type f -print | cut -c3-"
 
 	# Slightly better (than the default) ATL_C.
 	export FZF_ALT_C_OPTS="$FZF_DEFAULT_OPTS --height=35% --preview  \
@@ -360,6 +361,7 @@ if command -v fzf 1>/dev/null; then
 		-o -type d -print 2> /dev/null"
 
 	export FZF_CTRL_T_OPTS="$FZF_DEFAULT_OPTS"
+	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
 
 	if command -v bat 1>/dev/null; then
@@ -375,6 +377,14 @@ if command -v fzf 1>/dev/null; then
 		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
 		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
 		fzf | xargs readlink -f | xargs echo -n | xclip -selection c"
+
+	# Slightly better than the upstream supplied one:
+	# doesn't include dirs in the output.
+	_fzf_compgen_path() {
+		command find -L "$1" \
+			\( -name .git -o -name .hg -o -name .svn \) -prune -o \
+			\( -type f  -o -type l \) -print 2> /dev/null | sed 's@^\./@@'
+	}
 
 	_fzf_comprun()
 	{
@@ -403,6 +413,7 @@ if command -v fzf 1>/dev/null; then
 	esac
 	}
 fi
+
 
 
 ## Other
