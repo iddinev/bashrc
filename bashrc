@@ -256,7 +256,8 @@ alias l='ls -CF'
 alias less='less -R'
 
 if command -v xclip 1>/dev/null; then
-	alias copyclip="xclip -selection c"
+	# alias copyclip="echo -n | xclip -selection c"
+	alias copyclip="xargs echo -n | xclip -selection c"
 	alias pasteclip="xclip -selection c -o"
 fi
 
@@ -350,7 +351,8 @@ if command -v fzf 1>/dev/null; then
 		--color='16,gutter:-1,bg+:-1'
 		--color='border:-1,info:-1'"
 	# Include hidden files/dirs by default.
-	export FZF_DEFAULT_COMMAND="command find -L . -name .git -prune -o -type f -print | cut -c3-"
+	export FZF_DEFAULT_COMMAND='command find -L . \
+		-name .git -prune -o \( -type d -o -type f \) -print 2>/dev/null | cut -c3-'
 
 	# Slightly better (than the default) ATL_C.
 	export FZF_ALT_C_OPTS="$FZF_DEFAULT_OPTS --height=35% --preview  \
@@ -376,14 +378,14 @@ if command -v fzf 1>/dev/null; then
 	alias freadlink="command find -L ~ -mindepth 1 \
 		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
 		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
-		fzf | xargs readlink -f | xargs echo -n | xclip -selection c"
+		fzf | xargs readlink -f | xclip -selection c"
 
 	# Slightly better than the upstream supplied one:
 	# doesn't include dirs in the output.
 	_fzf_compgen_path() {
 		command find -L "$1" \
 			\( -name .git -o -name .hg -o -name .svn \) -prune -o \
-			\( -type f  -o -type l \) -print 2> /dev/null | sed 's@^\./@@'
+			\( -type f -o -type l \) -print 2> /dev/null | sed 's@^\./@@'
 	}
 
 	_fzf_comprun()
