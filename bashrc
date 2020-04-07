@@ -256,9 +256,9 @@ alias l='ls -CF'
 alias less='less -R'
 
 if command -v xclip 1>/dev/null; then
-	# alias copyclip="echo -n | xclip -selection c"
-	alias copyclip="xargs echo -n | xclip -selection c"
 	alias pasteclip="xclip -selection c -o"
+	alias copyclip="xclip -selection c "
+
 fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
@@ -378,7 +378,7 @@ if command -v fzf 1>/dev/null; then
 	alias freadlink="command find -L ~ -mindepth 1 \
 		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
 		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
-		fzf | xargs readlink -f | xclip -selection c"
+		fzf | xargs echo -n | xargs readlink -f | xclip -selection c"
 
 	# Slightly better than the upstream supplied one:
 	# doesn't include dirs in the output.
