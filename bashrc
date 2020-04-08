@@ -257,7 +257,7 @@ alias less='less -R'
 
 if command -v xclip 1>/dev/null; then
 	alias pasteclip="xclip -selection c -o"
-	alias copyclip="xclip -selection c "
+	alias copyclip="xclip -selection c"
 
 fi
 
@@ -372,14 +372,6 @@ if command -v fzf 1>/dev/null; then
 		export FZF_PREVIEW_COMMAND="head -40 {}"
 	fi
 
-	_fzf_setup_completion path readlink
-
-	# Easily copy full links from anywhere in the home dir to the clipboard.
-	alias freadlink="command find -L ~ -mindepth 1 \
-		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
-		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
-		fzf | xargs echo -n | xargs readlink -f | xclip -selection c"
-
 	# Slightly better than the upstream supplied one:
 	# doesn't include dirs in the output.
 	_fzf_compgen_path() {
@@ -411,9 +403,31 @@ if command -v fzf 1>/dev/null; then
 				--preview "head -40 {}" \
 				--preview-window=:wrap
 			fi;;
+		man)
+			fzf "$@" --height=50% \
+			--preview "man {}" \
+			--preview-window=:wrap;;
 		*)            fzf "$@" ;;
 	esac
 	}
+
+	_fzf_complete_man()
+	{
+		_fzf_complete --prompt="man> " -- "$@" < <( \
+			man -k . | cut -d ' ' -f 1
+		)
+	}
+
+
+	[ -n "$BASH" ] && complete -F _fzf_complete_man -o default -o bashdefault man
+	_fzf_setup_completion path readlink
+
+	# Easily copy full links from anywhere in the home dir to the clipboard.
+	alias freadlink="command find -L ~ -mindepth 1 \
+		-name .git -prune -o -name .hg -prune -o -name .svn -prune -o \
+		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
+		fzf | xargs echo -n | xargs readlink -f | xclip -selection c"
+
 fi
 
 
