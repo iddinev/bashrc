@@ -389,32 +389,38 @@ if command -v fzf 1>/dev/null; then
 			cd)
 				fzf "$@" --height=50% --preview \
 				'ls -C --color=always {} | head -30' \
-				--preview-window=:wrap;;
-		export|unset)
+				--preview-window=:wrap
+			;;
+			export|unset)
 				fzf "$@" --preview "eval 'echo \$'{}" \
-				--preview-window=:wrap;;
-		vim)
-			if command -v bat 1>/dev/null; then
-				fzf "$@" --height=45% \
-				--preview "bat -pp --color=always -r :40 {}" \
 				--preview-window=:wrap
-			else
-				fzf "$@" --height=45% \
-				--preview "head -40 {}" \
+			;;
+			vim)
+				if command -v bat 1>/dev/null; then
+					fzf "$@" --height=45% \
+					--preview "bat -pp --color=always -r :40 {}" \
+					--preview-window=:wrap
+				else
+					fzf "$@" --height=45% \
+					--preview "head -40 {}" \
+					--preview-window=:wrap
+				fi
+			;;
+			man)
+				fzf "$@" --height=50% \
+				--preview 'man {2} {1}' \
 				--preview-window=:wrap
-			fi;;
-		man)
-			fzf "$@" --height=50% \
-			--preview "man {}" \
-			--preview-window=:wrap;;
-		*)            fzf "$@" ;;
-	esac
+			;;
+			*)
+				fzf "$@"
+			;;
+		esac
 	}
 
 	_fzf_complete_man()
 	{
 		_fzf_complete --prompt="man> " -- "$@" < <( \
-			man -k . | cut -d ' ' -f 1
+			man -k . | sed 's/(\([0-9]\))/\1/'
 		)
 	}
 
@@ -508,3 +514,7 @@ unset fuzzyfinder_path
 ## Unset
 
 # unset TERM_TITLE
+# echo -en "\\e]P0112233"
+# echo -en "\\e]P1445566"
+# echo -en "\\e]P2778899"
+# clear
