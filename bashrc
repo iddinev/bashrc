@@ -408,7 +408,7 @@ if command -v fzf 1>/dev/null; then
 			;;
 			man)
 				fzf "$@" --height=50% \
-				--preview 'man {2} {1}' \
+				--preview 'man {1} {2}' \
 				--preview-window=:wrap
 			;;
 			*)
@@ -417,10 +417,13 @@ if command -v fzf 1>/dev/null; then
 		esac
 	}
 
+	# FZF cannot edit the selected line (post processing),
+	# So we have to rearange the section number before passing to man.
 	_fzf_complete_man()
 	{
 		_fzf_complete --prompt="man> " -- "$@" < <( \
-			man -k . | sed 's/(\([0-9]\))/\1/'
+			apropos . | cut -d ' ' -f -2 | tr --delete '[()]' | \
+			sed 's/^\(.*\)\([0-9][[:alpha:]]*\)/\2\t\1/'
 		)
 	}
 
