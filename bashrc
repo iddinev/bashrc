@@ -372,6 +372,19 @@ if command -v fzf 1>/dev/null; then
 		export FZF_PREVIEW_COMMAND="head -40 {}"
 	fi
 
+	# Interactive man (when called whithout args).
+	function fzf_man()
+	{
+		if [ "$#" -gt 0 ]; then
+			man "$@"
+		else
+			apropos . | sed 's/^\(.*\)\([0-9][[:alpha:]]*\)/\2\t\1/' | \
+			cut -d ' ' -f -2 | tr --delete '[()]' | \
+			fzf --height=50% --preview 'man {1} {2}' --preview-window=:wrap | \
+			xargs man
+		fi
+	}
+
 	# Slightly better than the upstream supplied one:
 	# doesn't include dirs in the output.
 	_fzf_compgen_path() {
@@ -406,30 +419,13 @@ if command -v fzf 1>/dev/null; then
 					--preview-window=:wrap
 				fi
 			;;
-			man)
-				fzf "$@" --height=50% \
-				--preview 'man {1} {2}' \
-				--preview-window=:wrap
-			;;
 			*)
 				fzf "$@"
 			;;
 		esac
 	}
 
-	# FZF cannot edit the selected line (post processing),
-	# So we have to rearange the section number before passing to man.
-	_fzf_complete_man()
-	{
-		_fzf_complete --prompt="man> " -- "$@" < <( \
-			apropos . | cut -d ' ' -f -2 | tr --delete '[()]' | \
-			sed 's/^\(.*\)\([0-9][[:alpha:]]*\)/\2\t\1/'
-		)
-	}
-
-
-	[ -n "$BASH" ] && complete -F _fzf_complete_man -o default -o bashdefault man
-	_fzf_setup_completion path readlink
+	alias man="fzf_man"
 
 	# Easily copy full links from anywhere in the home dir to the clipboard.
 	alias freadlink="command find -L ~ -mindepth 1 \
