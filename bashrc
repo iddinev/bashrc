@@ -1,3 +1,4 @@
+# shellcheck disable=SC1090,SC1091
 # vim: set filetype=sh:
 #
 # ~/.bashrc
@@ -33,6 +34,7 @@ local_bashrc_repo="$user_home/.bashrc.git"
 
 # Upstream/source for this bashrc.
 source_name='bashrc'
+# shellcheck disable=SC2034
 source_repo="https://github.com/iddinev/bashrc"
 source_url="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
 
@@ -40,6 +42,7 @@ source_url="https://raw.githubusercontent.com/iddinev/bashrc/master/bashrc"
 # Colors are picked from my custom material theme:
 # https://gist.github.com/iddinev/8998241c16642f7502d1e1dc511e7c68
 powerline_name=".bash-powerline"
+# shellcheck disable=SC2034
 powerline_repo="https://github.com/iddinev/bash-powerline"
 powerline_url="https://raw.githubusercontent.com/iddinev/bash-powerline/master/.bash-powerline"
 powerline_path="$user_home/$powerline_name"
@@ -48,6 +51,7 @@ powerline_path="$user_home/$powerline_name"
 # Install info, if fzf is not installed through the system's package manager already.
 fuzzyfinder_name=".bash-fuzzyfinder"
 fuzzyfinder_repo="https://github.com/junegunn/fzf"
+# shellcheck disable=SC2034
 fuzzyfinder_url="$fuzzyfinder_repo"
 fuzzyfinder_path="$user_home/$fuzzyfinder_name"
 
@@ -76,6 +80,7 @@ eval "function bashrc_update()
 
 }"
 
+# shellcheck disable=SC1078,SC1079,SC2027,SC2086
 eval "function bashrc_plugins_update()
 {
 	if command -v wget 1>/dev/null; then
@@ -158,10 +163,10 @@ if [[ $own_name == "$source_name" ]]; then
 	[ -f "$bashrc_path"."$backup_suffix" ] || cp -pv "$bashrc_path" "$bashrc_path"."$backup_suffix"
 	mv -v "$own_path" "$bashrc_path"
 	bashrc_update --create-local-git
-	if [ 0 -eq "$(find $own_dir\
+	if [ 0 -eq "$(find "$own_dir"\
 	-mindepth 1 -maxdepth 1 \! -name '.git' -a \! -name\
-	$own_name -a \! -name README.md | wc -l)" ] &&\
-	[ "$(readlink -f $PWD)" != "$own_dir" ]; then
+	"$own_name" -a \! -name README.md | wc -l)" ] &&\
+	[ "$(readlink -f "$PWD")" != "$own_dir" ]; then
 		echo "Removing the (uneeded) git repo '$own_dir'."
 		rm -rf "$own_dir/.git"
 		rm "$own_dir/README.md"
@@ -263,11 +268,13 @@ fi
 
 # Manage dot files inside $HOME without messing up any other repo(s) inside $HOME.
 if [[ -d $local_rc_repo ]]; then
+	# shellcheck disable=SC2139
 	alias git_rc="/usr/bin/git --git-dir=$local_rc_repo --work-tree=$user_home"
 fi
 
 # Store any local overrides and modifications in a local repo.
 if [[ -d $local_bashrc_repo ]]; then
+	# shellcheck disable=SC2139
 	alias git_bash="/usr/bin/git --git-dir=$local_bashrc_repo --work-tree=$user_home"
 fi
 
@@ -275,12 +282,14 @@ alias vim='vim -O'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
+# shellcheck disable=SC1004
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal \
-	|| echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+|| echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 
 # '|| true' is needed otherwise the overall exit code of the sourcing is 1
 # if the file is not presetn.
+# shellcheck disable=SC2015
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases || true
 
 
@@ -377,13 +386,14 @@ if command -v fzf 1>/dev/null; then
 	# Interactive man (when called whithout args).
 	function fzf_man()
 	{
+		# shellcheck disable=SC2021
 		if [ "$#" -gt 0 ]; then
 			man "$@"
 		else
 			apropos . | sed 's/^\(.*\)\([0-9][[:alpha:]]*\)/\2\t\1/' | \
 			cut -d ' ' -f -2 | tr --delete '[()]' | \
 			fzf --height=50% --preview 'man {1} {2}' --preview-window=:wrap | \
-			xargs man
+			xargs "man"
 		fi
 	}
 
@@ -486,6 +496,7 @@ unset fuzzyfinder_path
 
 # '|| true' is needed otherwise the overall exit code of the sourcing is 1
 # if the file is not presetn.
+# shellcheck disable=SC2015
 [ -f ~/.bashrc_override ] && source ~/.bashrc_override || true
 
 # Some useful overrides that I've picked up so far.
