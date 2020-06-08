@@ -377,12 +377,6 @@ if command -v fzf 1>/dev/null; then
 
 	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
 
-	if command -v bat 1>/dev/null; then
-		export FZF_PREVIEW_COMMAND="bat -pp --color=always -r :40 {}"
-	else
-		export FZF_PREVIEW_COMMAND="head -40 {}"
-	fi
-
 	# Interactive man (when called whithout args).
 	function fzf_man()
 	{
