@@ -1,4 +1,4 @@
-# shellcheck disable=SC1090,SC1091
+# shellcheck disable=SC1090,SC1091,SC2039
 # vim: set filetype=sh:
 #
 # ~/.bashrc
@@ -119,7 +119,7 @@ eval "function bashrc_uninstall()
 	echo -e '\\nRelogin to the shell to start in a clean environment.\\n'
 }"
 
-function bashrc_help()
+bashrc_help()
 {
     cat <<_EOF_
 
@@ -296,7 +296,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal \
 ## Functions
 
 # Handy extract.
-function extract()
+extract()
 {
 	if [ -f "$1" ] ; then
 		case "$1" in
@@ -378,7 +378,7 @@ if command -v fzf 1>/dev/null; then
 	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
 
 	# Interactive man (when called whithout args).
-	function fzf_man()
+	fzf_man()
 	{
 		# shellcheck disable=SC2021
 		if [ "$#" -gt 0 ]; then
