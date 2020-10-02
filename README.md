@@ -5,7 +5,7 @@ Obviously read the whole script before using it.
 
 ## Features
 - The script is intentionaly not named '.bashrc' so users can (and have the option to) save their initial .bashrc
-  befure using this one (and have the option to clean/revert to their configs if they don't like this one).
+  before using this one (and have the option to clean/revert to their configs if they don't like this one).
 - The script can deploy the .bashrc configs separately from the plugin configs. Sources are fetched
   from github using wget.
 - The 1st time the script is manually sourced it backups the preexisting .bashrc (if any),
