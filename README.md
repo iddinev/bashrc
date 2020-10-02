@@ -42,7 +42,7 @@ Obviously read the whole script before using it.
          Consecutive updates do not rewrite the initial backup.
 
          -c, --create-local-git
-             Create local git repos to manage local \$HOME & .bashrc modifications.
+             Create local git repos to manage local $HOME & .bashrc modifications.
 
      $ bashrc_plugins_update
 
