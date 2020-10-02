@@ -26,7 +26,7 @@ Obviously read the whole script before using it.
   https://github.com/junegunn/fzf
 
 ## Usage:
-```bash
+```
 
     Usage:
     1)
