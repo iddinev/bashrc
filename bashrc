@@ -315,6 +315,7 @@ extract()
 		*.7z)          7z x "$1"                    ;;
 		*.rpm)         rpm2cpio "$1" | cpio -idmv   ;;
 		*.deb)         ar -xv "$1"                  ;;
+		*.xz)          unxz -v "$1"                 ;;
 		*)             echo "'$1' cannot be extracted via >${FUNCNAME[0]}<" ;;
 		esac
 	else
