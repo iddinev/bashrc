@@ -358,7 +358,7 @@ if command -v fzf 1>/dev/null; then
 	# Minimalistic look for the fzf menu, colors are based on my material theme(s).
 	# Colors are picked to 'work' with both a dark and a light theme.
 	export FZF_DEFAULT_OPTS="--reverse --exact --height=20% --no-bold \
-		--color='16,gutter:-1,bg+:-1'
+		--color='16,gutter:-1,bg+:-1' \
 		--color='border:-1,info:-1'"
 	# Include hidden files by default, no directories.
 	export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \
