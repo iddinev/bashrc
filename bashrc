@@ -277,7 +277,9 @@ if [[ -d $local_bashrc_repo ]]; then
 	alias git_bash="/usr/bin/git --git-dir=$local_bashrc_repo --work-tree=$user_home"
 fi
 
-alias vim='vim -O'
+if command -v vim 1>/dev/null; then
+	alias vim='vim -O'
+fi
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
