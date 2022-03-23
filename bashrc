@@ -1,4 +1,4 @@
-# shellcheck disable=SC1090,SC1091,SC2039
+# shellcheck shell=bash disable=SC1090,SC1091,SC2039
 # vim: set filetype=sh:
 #
 # ~/.bashrc
@@ -55,6 +55,9 @@ fuzzyfinder_repo="https://github.com/junegunn/fzf"
 fuzzyfinder_url="$fuzzyfinder_repo"
 fuzzyfinder_path="$user_home/$fuzzyfinder_name"
 
+# System completions based on Arch linux (paths may vary on different OS).
+# This is the fastest multi-file source possible (still adds around 30%-40% startup time).
+source <(cat /usr/share/bash-completion/completions/*) 2>/dev/null
 
 # Functions for the main (deploy/install etc) part.
 
@@ -328,6 +331,8 @@ extract()
 # FZF
 if command -v fzf 1>/dev/null; then
 	# These paths may vary for different OS'es so adjust them as needed.
+	# For e.g. on Arch Linux, the fzf package does not populate the
+	# /usr/share/bash-completion/completions/ path.
 	# Auto-completion
 	# ---------------
 
