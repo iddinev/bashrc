@@ -84,7 +84,7 @@ eval "function bashrc_update()
 }"
 
 # shellcheck disable=SC1078,SC1079,SC2027,SC2086
-eval "function bashrc_plugins_update()
+eval "function bashrc_update_plugins()
 {
 	if command -v wget 1>/dev/null; then
 		# Powerline
@@ -143,7 +143,7 @@ bashrc_help()
          -c, --create-local-git
              Create local git repos to manage local \$HOME & .bashrc modifications.
 
-     $ bashrc_plugins_update
+     $ bashrc_update_plugins
 
          Update to the latest plugins from github.
 
@@ -280,7 +280,9 @@ if [[ -d $local_bashrc_repo ]]; then
 	alias git_bash="/usr/bin/git --git-dir=$local_bashrc_repo --work-tree=$user_home"
 fi
 
-alias vim='vim -O'
+if command -v vim 1>/dev/null; then
+	alias vim='vim -O'
+fi
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert

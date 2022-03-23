@@ -7,7 +7,7 @@ Obviously read the whole script before using it.
 - The script is intentionaly not named '.bashrc' so users can (and have the option to) save their initial .bashrc
   before using this one (and have the option to clean/revert to their configs if they don't like this one).
 - The script can deploy the .bashrc configs separately from the plugin configs. Sources are fetched
-  from github using wget.
+  from github using *wget*.
 - The 1st time the script is manually sourced it backups the preexisting .bashrc (if any),
   afterwards it moves itself to '$HOME/.bahsrc' and deletes the now uneeded git dir.
 - Local git repos to manage bashrc overrides/additions and modifications of the $HOME
@@ -44,7 +44,7 @@ Obviously read the whole script before using it.
          -c, --create-local-git
              Create local git repos to manage local $HOME & .bashrc modifications.
 
-     $ bashrc_plugins_update
+     $ bashrc_update_plugins
 
          Update to the latest plugins from github.
 
