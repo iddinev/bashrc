@@ -500,20 +500,37 @@ unset fuzzyfinder_path
 # shellcheck disable=SC2015
 [ -f ~/.bashrc_override ] && source ~/.bashrc_override || true
 
+
+
 # Some useful overrides that I've picked up so far.
 
-## Login
+## Env variables
 
-## MANUAL FIX FOR XUBUNTU/old XFCE (<4.11??) and RHEL (v6??).
+# MANUAL FIX FOR XUBUNTU/old XFCE (<4.11??) and RHEL (v6??).
 # For some reason the xfce4-terminal in xubuntu
 # cannot properly set the TERM var.
 #export TERM=xterm-256color
 
-
-## Env variables
-
 # Some tools like to drop you to a terminal when encountering a problem.
 #export OE_TERMINAL_CUSTOMCMD="gnome-terminal"
+
+
+## Plugins
+
+# Ubuntu
+# FZF
+#if command -v fzf 1>/dev/null; then
+#    # These paths may vary for different OS'es so adjust them as needed.
+#    # For e.g. on Arch Linux, the fzf package does not populate the
+#    # /usr/share/bash-completion/completions/ path.
+#    # Auto-completion
+#    # ---------------
+#
+#    [[ $- == *i* ]] && source "/usr/share/doc/fzf/examples/completion.bash" 2>/dev/null
+#    # Key bindings
+#    # ------------
+#    source "/usr/share/doc/fzf/examples/key-bindings.bash" 2>/dev/null
+#fi
 
 
 ## Other
