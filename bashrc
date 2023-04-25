@@ -196,7 +196,8 @@ shopt -s no_empty_cmd_completion
 
 ## Env variables
 
-export HISTCONTROL=ignoredups:ignorespace
+export HISTCONTROL=ignoreboth:erasedups
+export HISTSIZE=1500
 
 # Compromise until a better theme is supplied upstream.
 if command -v bat 1>/dev/null; then
