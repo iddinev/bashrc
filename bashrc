@@ -291,7 +291,6 @@ fi
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal \
 || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-
 # '|| true' is needed otherwise the overall exit code of the sourcing is 1
 # if the file is not presetn.
 # shellcheck disable=SC2015
@@ -447,6 +446,16 @@ if command -v fzf 1>/dev/null; then
 		\\( -type d -o -type f -o -type l \\) -print 2> /dev/null | \
 		fzf | xargs readlink -f | xclip -rmlastnl -selection c"
 
+fi
+
+# Bitwarden-CLI
+if command -v bw 1>/dev/null; then
+	bw_login()
+	{
+		bw login --raw "$BW_EMAIL" > /tmp/BW_SESSION
+	}
+
+	alias bw='bw --pretty --session "$(cat /tmp/BW_SESSION)"'
 fi
 
 
