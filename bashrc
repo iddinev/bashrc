@@ -55,10 +55,6 @@ fuzzyfinder_repo="https://github.com/junegunn/fzf"
 fuzzyfinder_url="$fuzzyfinder_repo"
 fuzzyfinder_path="$user_home/$fuzzyfinder_name"
 
-# System completions based on Arch linux (paths may vary on different OS).
-# This is the fastest multi-file source possible (still adds around 30%-40% startup time).
-source <(cat /usr/share/bash-completion/completions/*) 2>/dev/null
-
 # Functions for the main (deploy/install etc) part.
 
 # This whole 'eval' part is needed in order not to keep any variable definitions in the env.
@@ -471,6 +467,10 @@ fi
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 	source /etc/bash_completion
 fi
+
+# System completions based on Arch linux (paths may vary on different OS).
+# This is the fastest multi-file source possible (still adds around 30%-40% startup time).
+[ -d /usr/share/bash-completion/completions ] && source <(cat /usr/share/bash-completion/completions/*) 2>/dev/null
 
 
 ## Unset
