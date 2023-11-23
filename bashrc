@@ -356,7 +356,8 @@ else
 fi
 
 if command -v fzf 1>/dev/null; then
-	export FZF_COMPLETION_TRIGGER='``'
+	# Can't use '``' as of https://github.com/junegunn/fzf/issues/3459
+	export FZF_COMPLETION_TRIGGER='~~'
 	# Minimalistic look for the fzf menu, colors are based on my material theme(s).
 	# Colors are picked to 'work' with both a dark and a light theme.
 	export FZF_DEFAULT_OPTS="--reverse --exact --height=20% --no-bold \
@@ -448,12 +449,27 @@ fi
 if command -v bw 1>/dev/null; then
 	bw_login()
 	{
-		bw login --raw "$BW_EMAIL" > /tmp/BW_SESSION
+		command bw login --raw "$BW_EMAIL" > /tmp/BW_SESSION
 	}
 
-	alias bw='bw --pretty --session "$(cat /tmp/BW_SESSION)"'
-fi
+	# Per SC2262.
+	bw()
+	{
+		command bw --pretty --session "$(cat /tmp/BW_SESSION)" "$@"
+	}
 
+	if command -v jq 1>/dev/null; then
+		bw_get()
+		{
+			bw list items | jq '[.[] | [.folderId, .name, .login.username] + (.fields[]? | [.name, .value])
+			+ [.login.password?]]'\
+			| jq -r --argjson keys "$(bw list folders\
+			| jq 'map(select(.id != null) | { (.id): .name })
+				| reduce .[] as $obj ({}; . + $obj)')" '.[]
+				| [($keys[.[0]] // .[0])] + .[1:] | join(" ")'
+		}
+	fi
+fi
 
 
 ## Other
