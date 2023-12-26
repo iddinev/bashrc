@@ -471,34 +471,46 @@ if command -v bw 1>/dev/null; then
 
 	if command -v jq 1>/dev/null && command -v xclip 1>/dev/null; then
 
+		# shellcheck disable=SC2317
+		_password_clear_clip()
+		{
+
+			l_cur="$(cat /tmp/BW_CUR 2>/dev/null)"
+			rm /tmp/BW_CUR
+			sleep 30
+			[ "$(xclip -selection clip -out)"  = "$l_cur" ] && xclip -selection clip < /dev/null
+		}
+
+		export -f _password_clear_clip
+
 		password_get()
 		{
-			! _password_login_check && return 1
-			# '@json' quotes 'null' values produced by bw passwords with no folders.
-			# Beware - xclip might need nohup to survive terminal app exit.
-			# Command can be sped up if folderId->name is not used.
-			password_cli list items \
-				| jq -r --argjson keys "$(password_cli list folders \
-				| jq 'map({((.id | @json)): .name}) | add')" \
-					-r '.[] | select(.login.username and .login.password)
-					| [(.login.password, $keys[(.folderId | @json)]), .name, .login.username]
-					| join(" ")' \
-				| fzf --with-nth 2.. \
-				| cut -d ' ' -f 1 | tee /tmp/BW_CUR | xclip -rmlastnl -selection clip
-
-			# shellcheck disable=SC2317
-			_password_clear_clip()
-			{
-
-				l_cur="$(cat /tmp/BW_CUR 2>/dev/null)"
-				rm /tmp/BW_CUR
-				sleep 30
-				[ "$(xclip -selection clip -out)"  = "$l_cur" ] && xclip -selection clip < /dev/null
-			}
-
-			export -f _password_clear_clip
+			password_cli get password "$1" | tee /tmp/BW_CUR | xclip -rmlastnl -selection clip
 			pkill --full _password_clear_clip >/dev/null 2>&1
 			setsid bash -c "_password_clear_clip" >/dev/null 2>&1
+		}
+
+		password_fzf()
+		{
+			! _password_login_check && return 1
+			_password_fzf()
+			{
+				# '@json' quotes 'null' values produced by bw passwords with no folders.
+				# Beware - xclip might need nohup to survive terminal app exit.
+				# Command can be sped up if folderId->name is not used.
+				# Folder & login names should't have spaces in them, only the name can.
+				password_cli list items \
+					| jq -r --argjson keys "$(password_cli list folders \
+					| jq 'map({((.id | @json)): .name}) | add')" \
+						-r '.[] | select(.login.username and .login.password)
+						| [$keys[(.folderId | @json)], .login.username, .name]
+						| join(" ")' \
+					| fzf | cut -d ' ' -f 2
+			}
+
+			l_id="$(_password_fzf)"
+			history -s password_get "$l_id"
+			password_get "$l_id"
 		}
 	fi
 fi
