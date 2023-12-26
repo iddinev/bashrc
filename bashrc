@@ -452,16 +452,31 @@ if command -v bw 1>/dev/null; then
 		command bw login --raw "$BW_EMAIL" > /tmp/BW_SESSION
 	}
 
+	password_logout()
+	{
+		command bw logout
+	}
+
+	_password_login_check()
+	{
+		[ -s /tmp/BW_SESSION ]  || ( echo 'Missing/invalid session file - (re)login needed' && return 1 )
+	}
+
 	# Per SC2262.
 	password_cli()
 	{
+		! _password_login_check && return 1
 		command bw --pretty --session "$(cat /tmp/BW_SESSION)" "$@"
 	}
 
 	if command -v jq 1>/dev/null && command -v xclip 1>/dev/null; then
+
 		password_get()
 		{
+			! _password_login_check && return 1
 			# '@json' quotes 'null' values produced by bw passwords with no folders.
+			# Beware - xclip might need nohup to survive terminal app exit.
+			# Command can be sped up if folderId->name is not used.
 			password_cli list items \
 				| jq -r --argjson keys "$(password_cli list folders \
 				| jq 'map({((.id | @json)): .name}) | add')" \
@@ -469,7 +484,21 @@ if command -v bw 1>/dev/null; then
 					| [(.login.password, $keys[(.folderId | @json)]), .name, .login.username]
 					| join(" ")' \
 				| fzf --with-nth 2.. \
-				| cut -d ' ' -f 1 | xclip -rmlastnl -selection c
+				| cut -d ' ' -f 1 | tee /tmp/BW_CUR | xclip -rmlastnl -selection clip
+
+			# shellcheck disable=SC2317
+			_password_clear_clip()
+			{
+
+				l_cur="$(cat /tmp/BW_CUR 2>/dev/null)"
+				rm /tmp/BW_CUR
+				sleep 30
+				[ "$(xclip -selection clip -out)"  = "$l_cur" ] && xclip -selection clip < /dev/null
+			}
+
+			export -f _password_clear_clip
+			pkill --full _password_clear_clip >/dev/null 2>&1
+			setsid bash -c "_password_clear_clip" >/dev/null 2>&1
 		}
 	fi
 fi
