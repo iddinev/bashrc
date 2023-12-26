@@ -447,26 +447,29 @@ fi
 
 # Bitwarden-CLI
 if command -v bw 1>/dev/null; then
-	bw_login()
+	password_login()
 	{
 		command bw login --raw "$BW_EMAIL" > /tmp/BW_SESSION
 	}
 
 	# Per SC2262.
-	bw()
+	password_cli()
 	{
 		command bw --pretty --session "$(cat /tmp/BW_SESSION)" "$@"
 	}
 
-	if command -v jq 1>/dev/null; then
-		bw_get()
+	if command -v jq 1>/dev/null && command -v xclip 1>/dev/null; then
+		password_get()
 		{
-			bw list items | jq '[.[] | [.folderId, .name, .login.username] + (.fields[]? | [.name, .value])
-			+ [.login.password?]]'\
-			| jq -r --argjson keys "$(bw list folders\
-			| jq 'map(select(.id != null) | { (.id): .name })
-				| reduce .[] as $obj ({}; . + $obj)')" '.[]
-				| [($keys[.[0]] // .[0])] + .[1:] | join(" ")'
+			# '@json' quotes 'null' values produced by bw passwords with no folders.
+			password_cli list items \
+				| jq -r --argjson keys "$(password_cli list folders \
+				| jq 'map({((.id | @json)): .name}) | add')" \
+					-r '.[] | select(.login.username and .login.password)
+					| [(.login.password, $keys[(.folderId | @json)]), .name, .login.username]
+					| join(" ")' \
+				| fzf --with-nth 2.. \
+				| cut -d ' ' -f 1 | xclip -rmlastnl -selection c
 		}
 	fi
 fi
