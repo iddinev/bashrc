@@ -503,14 +503,31 @@ if command -v bw 1>/dev/null; then
 					| jq -r --argjson keys "$(password_cli list folders \
 					| jq 'map({((.id | @json)): .name}) | add')" \
 						-r '.[] | select(.login.username and .login.password)
-						| [$keys[(.folderId | @json)], .login.username, .name]
+						| [.id, .login.username, .name, $keys[(.folderId | @json)]]
 						| join(" ")' \
-					| fzf | cut -d ' ' -f 2
+					| fzf --with-nth 2..
 			}
 
-			l_id="$(_password_fzf)"
-			history -s password_get "$l_id"
-			password_get "$l_id"
+			entry="$(_password_fzf)"
+			if [ -n "$entry" ]; then
+				IFS=' ' read -ra items <<< "$entry"
+				id="${items[0]}"
+				login_name="${items[1]}"
+				name="${items[2]}"
+				# Check if we have spaces in the entry name.
+				if [ "${#items[@]}" -gt "1" ]; then
+					for (( i=3; i<="${#items[@]}"-2; i++ )); do
+						name="$name ${items[i]}"
+					done
+				fi
+				folder="${items[-1]}"
+				# Use the unique ID to prevent name collisions.
+				cmd="password_get $id # $login_name $name $folder"
+				# The history push allows for faster retrieval, once
+				# the password was found using the fzf method above.
+				history -s "$cmd"
+				password_get "$id"
+			fi
 		}
 	fi
 fi
