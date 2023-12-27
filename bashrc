@@ -471,6 +471,19 @@ if command -v bw 1>/dev/null; then
 
 	if command -v jq 1>/dev/null && command -v xclip 1>/dev/null; then
 
+		export BW_CLIP_CLEAR=30
+
+		_password_clear_clip()
+		{
+
+			l_cur="$(cat /tmp/BW_CUR 2>/dev/null)"
+			rm /tmp/BW_CUR
+			sleep "$BW_CLIP_CLEAR"
+			[ "$(xclip -selection clip -out)"  = "$l_cur" ] && xclip -selection clip < /dev/null
+		}
+
+		export -f _password_clear_clip
+
 		password_get()
 		{
 			! _password_login_check && return 1
@@ -486,17 +499,6 @@ if command -v bw 1>/dev/null; then
 				| fzf --with-nth 2.. \
 				| cut -d ' ' -f 1 | tee /tmp/BW_CUR | xclip -rmlastnl -selection clip
 
-			# shellcheck disable=SC2317
-			_password_clear_clip()
-			{
-
-				l_cur="$(cat /tmp/BW_CUR 2>/dev/null)"
-				rm /tmp/BW_CUR
-				sleep 30
-				[ "$(xclip -selection clip -out)"  = "$l_cur" ] && xclip -selection clip < /dev/null
-			}
-
-			export -f _password_clear_clip
 			pkill --full _password_clear_clip >/dev/null 2>&1
 			setsid bash -c "_password_clear_clip" >/dev/null 2>&1
 		}
