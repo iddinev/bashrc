@@ -388,10 +388,15 @@ if command -v fzf 1>/dev/null; then
 		if [ "$#" -gt 0 ]; then
 			man "$@"
 		else
-			apropos . | sed 's/^\(.*\)\([0-9][[:alpha:]]*\)/\2\t\1/' | \
+			l_result=$(apropos . | sed 's/^\(.*\)\([0-9][[:alpha:]]*\)/\2\t\1/' | \
 			cut -d ' ' -f -2 | tr --delete '[()]' | \
-			fzf --height=50% --preview 'man {1} {2}' --preview-window=:wrap | \
-			xargs "man"
+			fzf --height=50% --preview 'man {1} {2}' --preview-window=:wrap)
+			if [ -n "$l_result" ]; then
+				# shellcheck disable=SC2086
+				man $l_result
+				# Append selected 'man <result>' to history, instead of just 'man'.
+				history -s "man $l_result"
+			fi
 		fi
 	}
 
