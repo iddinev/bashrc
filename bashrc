@@ -360,23 +360,39 @@ if command -v fzf 1>/dev/null; then
 	export FZF_COMPLETION_TRIGGER='~~'
 	# Minimalistic look for the fzf menu, colors are based on my material theme(s).
 	# Colors are picked to 'work' with both a dark and a light theme.
-	export FZF_DEFAULT_OPTS="--reverse --exact --height=20% --no-bold \
-		--color='16,gutter:-1,bg+:-1' \
-		--color='border:-1,info:-1'"
+	export FZF_DEFAULT_OPTS="\
+		--reverse \
+		--exact \
+		--height=20% \
+		--no-bold \
+		--algo=v2 \
+		--scheme=path \
+		--tiebreak=begin,length \
+		--no-separator \
+		--no-scrollbar \
+		--gutter=' ' \
+		--pointer='>' \
+		--marker='>>' \
+		--marker-multi-line='^-v' \
+		--color='16,gutter:-1,bg+:-1,fg+:3,border:-1,info:-1'"
 	# Include hidden files by default, no directories.
-	export FZF_DEFAULT_COMMAND="command find -L . -mindepth 1 \
+	export FZF_DEFAULT_COMMAND="\
+		command find -L . -mindepth 1 \
 		-name .git -prune -o -type f -print 2>/dev/null | cut -c3-"
 
 	# Slightly better (than the default) ATL_C.
-	export FZF_ALT_C_OPTS="$FZF_DEFAULT_OPTS --height=35% --preview  \
+	export FZF_ALT_C_OPTS="$FZF_DEFAULT_OPTS \
+		--height=35% --preview  \
 		'ls -C --color=always {} | head -30' --preview-window=:wrap"
-	export FZF_ALT_C_COMMAND="command find -L ~ -mindepth 1 \\( -fstype 'sysfs' -o \
+	export FZF_ALT_C_COMMAND="\
+		command find -L ~ -mindepth 1 \\( -fstype 'sysfs' -o \
 		-fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' -o \
 		-name .git -o -name .hg -o -name .svn \\) -prune \
 		-o -type d -print 2> /dev/null"
 
 	export FZF_CTRL_T_OPTS="$FZF_DEFAULT_OPTS"
-	export FZF_CTRL_T_COMMAND="command find -L . -mindepth 1 \
+	export FZF_CTRL_T_COMMAND="\
+		command find -L . -mindepth 1 \
 		-name .git -prune -o \\( -type d -o -type f \\) -print 2>/dev/null | cut -c3-"
 
 	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
