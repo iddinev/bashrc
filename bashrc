@@ -324,6 +324,21 @@ extract()
 }
 
 
+## Completions
+
+# Source default completion first so they can be overriden (by plugins)
+# Enable bash completions.
+[ -r /usr/share/bash-completion/bash_completion ] && \
+	source /usr/share/bash-completion/bash_completion
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+	source /etc/bash_completion
+fi
+
+# System completions based on Arch linux (paths may vary on different OS).
+# This is the fastest multi-file source possible (still adds around 30%-40% startup time).
+[ -d /usr/share/bash-completion/completions ] && source <(cat /usr/share/bash-completion/completions/*) 2>/dev/null
+
+
 ## Plugins
 
 # FZF
@@ -531,17 +546,6 @@ fi
 
 # Make less more friendly for non-text input files, see lesspipe(1).
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# Enable bash completions.
-[ -r /usr/share/bash-completion/bash_completion ] && \
-	source /usr/share/bash-completion/bash_completion
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-	source /etc/bash_completion
-fi
-
-# System completions based on Arch linux (paths may vary on different OS).
-# This is the fastest multi-file source possible (still adds around 30%-40% startup time).
-[ -d /usr/share/bash-completion/completions ] && source <(cat /usr/share/bash-completion/completions/*) 2>/dev/null
 
 
 ## Unset
