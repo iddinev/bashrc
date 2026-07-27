@@ -410,7 +410,7 @@ if command -v fzf 1>/dev/null; then
 		command find -L . -mindepth 1 \
 		-name .git -prune -o \\( -type d -o -type f \\) -print 2>/dev/null | cut -c3-"
 
-	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS"
+	export FZF_CTRL_R_OPTS="$FZF_DEFAULT_OPTS --scheme=history"
 
 	# Interactive man (when called whithout args).
 	fzf_man()
