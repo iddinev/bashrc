@@ -377,11 +377,9 @@ if command -v fzf 1>/dev/null; then
 	# Colors are picked to 'work' with both a dark and a light theme.
 	export FZF_DEFAULT_OPTS="\
 		--reverse \
-		--exact \
 		--height=20% \
 		--no-bold \
 		--algo=v2 \
-		--scheme=path \
 		--tiebreak=begin,length \
 		--no-separator \
 		--no-scrollbar \
